@@ -64,3 +64,4 @@ export const useEntitlements = (): Entitlements => {
   const isPremium = isSubscribed || cardsRemaining > 0;
 
   return { isPremium, isSubscribed, cardsRemaining, premiumStatus, moneyAllocation, setMoneyAllocation, loading, refresh };
+};
