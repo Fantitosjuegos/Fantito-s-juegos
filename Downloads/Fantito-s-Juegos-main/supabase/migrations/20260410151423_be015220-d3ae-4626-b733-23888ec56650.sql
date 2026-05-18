@@ -1,0 +1,1 @@
+ALTER TABLE public.skipped_cards ADD COLUMN action text NOT NULL DEFAULT 'skip';

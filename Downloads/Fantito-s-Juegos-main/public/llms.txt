@@ -1,0 +1,10 @@
+# Fantito's Juegos
+
+> AI-powered party game app. Fantito reads your group's vibe and generates a personalized card-based party game. No signup, 2–10 players, starts in 10 seconds.
+
+Fantito's Juegos is a mobile-first web app that creates adaptive party games. Players choose vibe, intensity, scene (house party, road trip, chill night), and Fantito (an AI mascot) generates personalized questions, quizzes, votes, pair challenges, and minigames. Includes a free Luck mode (dice, coin, wheel, bottle, picker, tournament).
+
+## Pages
+
+- [Home](/): Start a game, set up players, choose vibe, generate cards.
+- [Auth](/auth): Sign in or sign up to unlock more games.
