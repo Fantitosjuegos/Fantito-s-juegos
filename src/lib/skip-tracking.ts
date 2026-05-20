@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { GameCard } from './game-types';
+import { logger } from '@/lib/logger';
 
 let sessionId: string | null = null;
 
@@ -32,7 +33,7 @@ export async function trackSkippedCard(
       action: 'skip',
     });
   } catch (e) {
-    console.warn('Failed to track skipped card:', e);
+    logger.warn('Failed to track skipped card:', e);
   }
 }
 
@@ -54,7 +55,7 @@ export async function trackDoneCard(
       action: 'done',
     });
   } catch (e) {
-    console.warn('Failed to track done card:', e);
+    logger.warn('Failed to track done card:', e);
   }
 }
 
@@ -76,6 +77,6 @@ export async function trackStarredCard(
       action: 'star',
     });
   } catch (e) {
-    console.warn('Failed to track starred card:', e);
+    logger.warn('Failed to track starred card:', e);
   }
 }

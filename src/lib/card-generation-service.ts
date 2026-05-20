@@ -4,6 +4,7 @@ import { composePrompt, ComposedPrompt } from './prompt-engine';
 import { supabase } from '@/integrations/supabase/client';
 import { getLiveFeedback } from './session-feedback';
 import { loadRecentQuestions, rememberQuestions } from './question-memory';
+import { logger } from '@/lib/logger';
 
 // Fantitos session = exactly 25 cards: 7 calibration + 18 adaptive.
 const BATCH1_SIZE = 7;
@@ -71,7 +72,7 @@ async function generateBatch(
   });
 
   if (error) {
-    console.error(`Batch ${batch} error:`, error);
+    logger.error(`Batch ${batch} error:`, error);
     throw new Error(error.message || `Batch ${batch} failed`);
   }
   const offset = batch === 1 ? 0 : BATCH1_SIZE;
@@ -97,14 +98,14 @@ export async function commitGameSession(): Promise<{ success: boolean; outOfCred
       if (msg.includes('insufficient_credits') || msg.includes('402')) {
         return { success: false, outOfCredits: true };
       }
-      console.warn('commitGameSession error:', error);
+      logger.warn('commitGameSession error:', error);
       return { success: false };
     }
     // functions.invoke returns `data: unknown` — narrow it safely
     const result = data as Record<string, unknown> | null;
     return { success: !!result?.success };
   } catch (e) {
-    console.warn('commitGameSession failed:', e);
+    logger.warn('commitGameSession failed:', e);
     return { success: false };
   }
 }
@@ -147,7 +148,7 @@ export async function generateGameCards(state: OnboardingState): Promise<Generat
     await rememberQuestions(batch1Cards.map(c => c.question));
     return { cards: batch1Cards, prompt, source: 'ai', hasMoreLoading: true };
   } catch {
-    console.warn('AI generation failed, using mock fallback');
+    logger.warn('AI generation failed, using mock fallback');
     const cards = generateMockFallback(BATCH1_SIZE, state);
     await rememberQuestions(cards.map(c => c.question));
     return { cards, prompt, source: 'mock' };
@@ -173,7 +174,7 @@ export async function generateRestOfCards(
   try {
     batch2Cards = await generateBatch(prompt, state, 2, avoid);
   } catch {
-    console.warn('Batch 2 failed, using mock fallback');
+    logger.warn('Batch 2 failed, using mock fallback');
     batch2Cards = generateMockFallback(BATCH2_SIZE, state);
   }
   const seen = new Set(existingCards.map(c => c.question.trim().toLowerCase()));
