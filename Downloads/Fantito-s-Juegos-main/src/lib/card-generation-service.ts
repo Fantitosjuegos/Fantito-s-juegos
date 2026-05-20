@@ -142,14 +142,14 @@ export interface GenerationResult {
 export async function generateGameCards(state: OnboardingState): Promise<GenerationResult> {
   const prompt = composePrompt(state);
   try {
-    const crossSessionAvoid = loadRecentQuestions();
+    const crossSessionAvoid = await loadRecentQuestions();
     const batch1Cards = await generateBatch(prompt, state, 1, crossSessionAvoid);
-    rememberQuestions(batch1Cards.map(c => c.question));
+    await rememberQuestions(batch1Cards.map(c => c.question));
     return { cards: batch1Cards, prompt, source: 'ai', hasMoreLoading: true };
   } catch {
     console.warn('AI generation failed, using mock fallback');
     const cards = generateMockFallback(BATCH1_SIZE, state);
-    rememberQuestions(cards.map(c => c.question));
+    await rememberQuestions(cards.map(c => c.question));
     return { cards, prompt, source: 'mock' };
   }
 }
@@ -164,7 +164,7 @@ export async function generateRestOfCards(
   prompt: ComposedPrompt,
   existingCards: GameCard[],
 ): Promise<GameCard[]> {
-  const crossSessionAvoid = loadRecentQuestions();
+  const crossSessionAvoid = await loadRecentQuestions();
   const avoid = [
     ...existingCards.map(c => c.question).filter(Boolean),
     ...crossSessionAvoid,
@@ -193,6 +193,6 @@ export async function generateRestOfCards(
     allCards = [...allCards, ...filler];
   }
   allCards = allCards.slice(0, TOTAL_DECK_SIZE).map((c, i) => ({ ...c, card_id: i + 1 }));
-  rememberQuestions(allCards.slice(existingCards.length).map(c => c.question));
+  await rememberQuestions(allCards.slice(existingCards.length).map(c => c.question));
   return allCards;
 }

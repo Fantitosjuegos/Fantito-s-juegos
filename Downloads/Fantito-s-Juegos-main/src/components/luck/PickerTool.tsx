@@ -11,8 +11,9 @@ const PickerTool = ({ onBack }: { onBack: () => void }) => {
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    const saved = loadLuckPlayers();
-    setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3']);
+    loadLuckPlayers().then(saved => {
+      setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3']);
+    });
     return () => { timers.current.forEach(t => clearTimeout(t)); };
   }, []);
 

@@ -61,8 +61,9 @@ const TournamentTool = ({ onBack }: { onBack: () => void }) => {
   const [champion, setChampion] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = loadLuckPlayers();
-    setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+    loadLuckPlayers().then(saved => {
+      setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+    });
   }, []);
 
   const add = () => {

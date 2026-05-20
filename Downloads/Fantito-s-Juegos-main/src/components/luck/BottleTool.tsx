@@ -18,8 +18,9 @@ const BottleTool = ({ onBack }: { onBack: () => void }) => {
   const [picked, setPicked] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = loadLuckPlayers();
-    setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+    loadLuckPlayers().then(saved => {
+      setNames(saved.length >= 2 ? saved : ['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+    });
   }, []);
 
   const isPair = mode === 'duo';
