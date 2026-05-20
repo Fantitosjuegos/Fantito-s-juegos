@@ -147,11 +147,14 @@ export async function generateGameCards(state: OnboardingState): Promise<Generat
     const batch1Cards = await generateBatch(prompt, state, 1, crossSessionAvoid);
     await rememberQuestions(batch1Cards.map(c => c.question));
     return { cards: batch1Cards, prompt, source: 'ai', hasMoreLoading: true };
-  } catch {
-    logger.warn('AI generation failed, using mock fallback');
-    const cards = generateMockFallback(BATCH1_SIZE, state);
-    await rememberQuestions(cards.map(c => c.question));
-    return { cards, prompt, source: 'mock' };
+} catch (err) {
+    if (import.meta.env.DEV) {
+      logger.warn('AI generation failed, using mock fallback');
+      const cards = generateMockFallback(BATCH1_SIZE, state);
+      await rememberQuestions(cards.map(c => c.question));
+      return { cards, prompt, source: 'mock' };
+    }
+    throw err;
   }
 }
 
@@ -173,9 +176,14 @@ export async function generateRestOfCards(
   let batch2Cards: GameCard[] = [];
   try {
     batch2Cards = await generateBatch(prompt, state, 2, avoid);
-  } catch {
-    logger.warn('Batch 2 failed, using mock fallback');
-    batch2Cards = generateMockFallback(BATCH2_SIZE, state);
+} catch (err) {
+    if (import.meta.env.DEV) {
+      logger.warn('Batch 2 failed, using mock fallback');
+      batch2Cards = generateMockFallback(BATCH2_SIZE, state);
+    } else {
+      throw err;
+    }
+  }
   }
   const seen = new Set(existingCards.map(c => c.question.trim().toLowerCase()));
   const deduped = batch2Cards.filter(c => {
