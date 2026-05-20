@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Fantito's Juegos
 
 TODO: Document your project here
