@@ -23,9 +23,10 @@ const WheelTool = ({ onBack }: { onBack: () => void }) => {
   const [winnerIdx, setWinnerIdx] = useState<number | null>(null);
 
   useEffect(() => {
-    const saved = loadLuckPlayers();
-    if (saved.length >= 2) setNames(saved);
-    else setNames(['Player 1', 'Player 2', 'Player 3']);
+    loadLuckPlayers().then(saved => {
+      if (saved.length >= 2) setNames(saved);
+      else setNames(['Player 1', 'Player 2', 'Player 3']);
+    });
   }, []);
 
   const add = () => {

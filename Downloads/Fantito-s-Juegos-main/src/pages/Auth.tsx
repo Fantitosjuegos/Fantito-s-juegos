@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import { storage } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Mail, ArrowLeft, Sparkles, Flame, Eye, Skull, Heart } from 'lucide-react';
@@ -118,9 +119,9 @@ const Auth = () => {
         });
         if (error) throw error;
 
-        // Ephemeral session flag — kept for now; will be replaced in Phase 4
-        if (staySignedIn) localStorage.removeItem('fantito_ephemeral_session');
-        else              localStorage.setItem('fantito_ephemeral_session', '1');
+        // Ephemeral session flag — persisted via platform-aware storage
+        if (staySignedIn) await storage.remove('fantito_ephemeral_session');
+        else              await storage.set('fantito_ephemeral_session', '1');
 
         navigate(redirect, { replace: true });
       }

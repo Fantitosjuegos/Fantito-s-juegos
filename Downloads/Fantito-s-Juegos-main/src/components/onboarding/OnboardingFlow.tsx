@@ -4,6 +4,7 @@ import { GameCard, GenerationStatus } from '@/lib/game-types';
 import { generateGameCards, generateRestOfCards } from '@/lib/card-generation-service';
 import type { ComposedPrompt } from '@/lib/prompt-engine';
 import { saveLuckPlayers } from '@/lib/luck-storage';
+import { storage } from '@/lib/storage';
 import StartScreen from './StartScreen';
 import { useAuth } from '@/hooks/useAuth';
 import PaywallModal from '../PaywallModal';
@@ -51,7 +52,7 @@ const OnboardingFlow = () => {
   // Persist player names so Luck tools can auto-fill them.
   useEffect(() => {
     if (state.players.length > 0) {
-      saveLuckPlayers(state.players.map(p => p.name));
+      void saveLuckPlayers(state.players.map(p => p.name));
     }
   }, [state.players]);
 
@@ -72,11 +73,9 @@ const OnboardingFlow = () => {
   };
 
   const handleStartGame = async () => {
-    // Soft-lock anonymous users after their first free game (25 cards).
-    // Only increment AFTER successful generation so a failure doesn't burn the free game.
     const isAnon = !user;
     if (isAnon) {
-      const played = Number(localStorage.getItem('anonGamesPlayed') || '0');
+      const played = Number(await storage.get('anonGamesPlayed') ?? '0');
       if (played >= 1) {
         setShowAnonPaywall(true);
         return;
@@ -96,8 +95,8 @@ const OnboardingFlow = () => {
       tutorialShownRef.current = true;
       setMoreCardsLoading(!!result.hasMoreLoading);
       if (isAnon) {
-        const played = Number(localStorage.getItem('anonGamesPlayed') || '0');
-        localStorage.setItem('anonGamesPlayed', String(played + 1));
+        const played = Number(await storage.get('anonGamesPlayed') ?? '0');
+        await storage.set('anonGamesPlayed', String(played + 1));
       }
     } catch {
       setGenerationStatus('error');
