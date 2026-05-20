@@ -65,7 +65,7 @@ const Auth = () => {
           // After OAuth the user lands back on the app at this URL.
           // In Phase 4 (Capacitor) this must be changed to a deep-link URI,
           // e.g. "fantitosjuegos://auth/callback"
-          redirectTo: window.location.origin + redirect,
+          redirectTo: (window.location.origin.startsWith('capacitor') ? 'app.fantitosjuegos.fun://auth/callback' : window.location.origin) + redirect,
         },
       });
 
@@ -107,7 +107,7 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email: emailRes.data,
           password: passRes.data,
-          options: { emailRedirectTo: `${window.location.origin}${redirect}` },
+          options: { emailRedirectTo: `${window.location.origin.startsWith('capacitor') ? 'app.fantitosjuegos.fun://auth/callback' : window.location.origin}${redirect}` },
         });
         if (error) throw error;
         toast({ title: '🔥 Chaos profile created', description: 'Check your email to verify, then jump back in.' });
