@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Fantito\'s Juegos</string>
+    <string name="title_activity_main">Fantito\'s Juegos</string>
+    <string name="package_name">app.fantitosjuegos.fun</string>
+    <string name="custom_url_scheme">app.fantitosjuegos.fun</string>
+</resources>
