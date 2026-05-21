@@ -149,7 +149,7 @@ export async function generateGameCards(state: OnboardingState): Promise<Generat
     return { cards: batch1Cards, prompt, source: 'ai', hasMoreLoading: true };
 } catch (err) {
   if (import.meta.env.DEV) {
-     logger.warn('AI generation failed, using mock fallback');
+    logger.warn('AI generation failed, using mock fallback');
       const cards = generateMockFallback(BATCH1_SIZE, state);
       await rememberQuestions(cards.map(c => c.question));
       return { cards, prompt, source: 'mock' };
