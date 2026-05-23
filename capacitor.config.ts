@@ -8,6 +8,11 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: true,
     },
+    Keyboard: {
+      resize: 'ionic',
+      scrollAssist: true,
+      hideFormAccessoryBar: false,
+    },
   },
   android: {
     allowMixedContent: true,
