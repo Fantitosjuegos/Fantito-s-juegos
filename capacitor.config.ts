@@ -16,10 +16,12 @@ const config: CapacitorConfig = {
   },
   android: {
     allowMixedContent: true,
+    webContentsDebuggingEnabled: true,
   },
   server: {
     iosScheme: 'app.fantitosjuegos.fun',
-    androidScheme: 'app.fantitosjuegos.fun',
+    androidScheme: 'https',
+    cleartext: true,
   },
 };
 
