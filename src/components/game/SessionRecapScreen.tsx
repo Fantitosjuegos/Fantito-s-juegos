@@ -4,7 +4,7 @@ import { isRTL } from '@/lib/translations';
 import { GameCard } from '@/lib/game-types';
 import { Mood } from '@/lib/card-mood';
 import { Flame, Repeat, RotateCcw, Sparkles, Eye, Skull, Lock, Brain, Users } from 'lucide-react';
-import mascot from '@/assets/mascot.png';
+import mascot from '@/assets/mascot.webp';
 import AtmosphereLayer from './AtmosphereLayer';
 import { buildSessionReport } from '@/lib/session-report';
 

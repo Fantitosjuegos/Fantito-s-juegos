@@ -1,6 +1,6 @@
 import { Language } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
-import mascot from '@/assets/mascot.png';
+import mascot from '@/assets/mascot.webp';
 
 interface SwipeTutorialScreenProps {
   lang: Language;
