@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cardToMood } from '@/lib/card-mood';
 import { toast } from '@/hooks/use-toast';
 
-import mascot from '@/assets/mascot.png';
+import mascot from '@/assets/mascot.webp';
 import AtmosphereLayer from './AtmosphereLayer';
 import CardShell from './CardShell';
 import QuestionCard from './cards/QuestionCard';

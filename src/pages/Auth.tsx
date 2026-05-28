@@ -7,7 +7,7 @@ import { storage } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Mail, ArrowLeft, Sparkles, Flame, Eye, Skull, Heart } from 'lucide-react';
-import mascot from '@/assets/mascot.png';
+import mascot from '@/assets/mascot.webp';
 
 const emailSchema    = z.string().trim().email({ message: 'Invalid email' }).max(255);
 const passwordSchema = z.string().min(6, { message: 'Password must be at least 6 characters' }).max(72);

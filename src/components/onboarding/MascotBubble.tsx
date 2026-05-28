@@ -1,4 +1,4 @@
-import mascotAvatar from '@/assets/mascot-avatar.png';
+import mascotAvatar from '@/assets/mascot-avatar.webp';
 
 interface MascotBubbleProps {
   message: string;

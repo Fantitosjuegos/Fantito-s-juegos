@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Plus, X } from 'lucide-react';
 import { loadLuckPlayers } from '@/lib/luck-storage';
-import mascotPointer from '@/assets/mascot-pointer.png';
+import mascotPointer from '@/assets/mascot-pointer.webp';
 
 // Brand-cohesive palette (pink/blue + warm tints from index.css)
 const PALETTE = [

@@ -4,7 +4,7 @@ import { Language, OnboardingState, RELATION_TYPES, VIBES } from '@/lib/onboardi
 import { isRTL } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { cssVars } from '@/lib/css-utils';
-import mascot from '@/assets/mascot.png';
+import mascot from '@/assets/mascot.webp';
 
 interface GeneratingScreenProps {
   lang: Language;

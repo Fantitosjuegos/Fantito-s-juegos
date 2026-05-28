@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles, Globe, LogIn, LogOut, X, Flame, Zap, Users, Wand2, Dice5 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import startBg from '@/assets/start-bg.png';
+import startBg from '@/assets/start-bg.webp';
 import { Language, LANGUAGES } from '@/lib/onboarding-types';
 import { useAuth } from '@/hooks/useAuth';
 
