@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { Language, ConsumptionType, GameMode } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
 import { GameCard } from '@/lib/game-types';
@@ -343,4 +343,4 @@ function FomoStat({ n, label, mood }: { n: number; label: string; mood: Mood }) 
   );
 }
 
-export default SessionRecapScreen;
+export default memo(SessionRecapScreen);

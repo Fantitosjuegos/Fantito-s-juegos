@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { GameCard } from '@/lib/game-types';
 import { Language, ConsumptionType, GameMode, OnboardingState, VIBES } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
@@ -415,4 +415,4 @@ const RecapRow = ({ label, children }: { label: string; children: React.ReactNod
   </div>
 );
 
-export default CardsScreen;
+export default memo(CardsScreen);
