@@ -10,6 +10,7 @@ import { useEntitlements } from '@/hooks/useEntitlements';
 import { useAuth } from '@/hooks/useAuth';
 import { cardToMood } from '@/lib/card-mood';
 import { toast } from '@/hooks/use-toast';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 
 import AtmosphereLayer from './AtmosphereLayer';
@@ -78,6 +79,12 @@ const CardsScreen = ({
 
   // Reset live feedback buffer at the start of each new session
   useEffect(() => { resetLiveFeedback(); }, []);
+
+  // Keep screen awake during gameplay — cards dim during reading otherwise
+  useEffect(() => {
+    KeepAwake.keepAwake().catch(() => {/* not supported on web — ignore */});
+    return () => { KeepAwake.allowSleep().catch(() => {}); };
+  }, []);
 
   // When batch 2 arrives, update the session total so the recap counts the full deck.
   useEffect(() => {

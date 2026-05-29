@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Language, LANGUAGES } from '@/lib/onboarding-types';
 import { useAuth } from '@/hooks/useAuth';
 import { useEntitlements } from '@/hooks/useEntitlements';
-import startBg from '@/assets/start-bg.png';
+import startBg from '@/assets/start-bg.webp';
 
 
 interface StartScreenProps {

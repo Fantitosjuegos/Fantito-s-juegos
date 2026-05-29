@@ -5,18 +5,20 @@ export function useNetwork() {
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
-    // Get initial status
+    let handle: { remove: () => void } | null = null;
+
     Network.getStatus().then(status => {
       setIsOnline(status.connected);
     });
 
-    // Listen for changes
-    const listener = Network.addListener('networkStatusChange', status => {
+    Network.addListener('networkStatusChange', status => {
       setIsOnline(status.connected);
+    }).then(h => {
+      handle = h;
     });
 
     return () => {
-      listener.then(l => l.remove());
+      handle?.remove();
     };
   }, []);
 

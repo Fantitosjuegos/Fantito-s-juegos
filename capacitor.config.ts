@@ -42,13 +42,12 @@ const config: CapacitorConfig = {
     limitsNavigationsToAppBoundDomains: true,
   },
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     webContentsDebuggingEnabled: isDev,
   },
   server: {
     iosScheme: 'app.fantitosjuegos.fun',
     androidScheme: 'https',
-    cleartext: true,
   },
 };
 

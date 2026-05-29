@@ -150,8 +150,7 @@ export function buildDynamicPrompt(state: OnboardingState): string {
     game_mode: state.gameMode,
     players,
     player_count: players.length,
-    relations,
-    relations_detail,
+    relations: relations_detail,
     has_relations: relations_detail.length > 0,
     vibes: vibeIds,
     vibes_detail,
@@ -167,7 +166,6 @@ export function buildDynamicPrompt(state: OnboardingState): string {
     ctx.scene = {
       id: state.contextState,
       theme: sceneInfo.theme,
-      ideas: sceneInfo.card_ideas,
       emoji: sceneInfo.emoji,
     };
     const host = state.hostPlayerId ? state.players.find(p => p.id === state.hostPlayerId) : null;
@@ -178,6 +176,20 @@ export function buildDynamicPrompt(state: OnboardingState): string {
     if (driver && state.contextState === 'road-trip') {
       ctx.scene.driver = { name: driver.name, emoji: driver.emoji };
     }
+  }
+
+  // Game type filter — only active when 2+ types selected
+  if (state.selectedGameTypes?.length >= 2) {
+    ctx.game_type_filter = {
+      active: true,
+      types: state.selectedGameTypes,
+      instruction: 'Generate ONLY these card types. Ignore all other types.',
+    };
+  }
+
+  // Time of night — flavors pacing and energy
+  if (state.timing) {
+    ctx.time_of_night = state.timing;
   }
 
   if (state.freeTextDetails) {
