@@ -89,6 +89,8 @@ const en: TranslationKeys = {
   pregame: 'Pregame',
   chillNight: 'Chill night in',
   vacation: 'Vacation',
+  afterparty: 'Afterparty',
+  coffeeShop: 'Coffee shop',
   birthday: 'Birthday 🎂',
   firstTime: 'First time hanging',
   reunion: 'Reunion',

@@ -75,6 +75,8 @@ const ar: TranslationKeys = {
   pregame: 'قبل الحفلة',
   chillNight: 'ليلة هادئة',
   vacation: 'إجازة',
+  afterparty: 'حفلة بعدية',
+  coffeeShop: 'مقهى',
   birthday: 'عيد ميلاد 🎂',
   firstTime: 'أول مرة معاً',
   reunion: 'لقاء',

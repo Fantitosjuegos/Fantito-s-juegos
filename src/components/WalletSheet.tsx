@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Wallet, Sparkles, Gift, Coins, Zap, Tag, Loader2, Car, Rocket } from 'lucide-react';
+import { X, Wallet, Sparkles, Gift, Coins, Zap, Tag, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useEntitlements, type MoneyAllocation } from '@/hooks/useEntitlements';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -19,8 +19,6 @@ const WalletSheet = ({ open, onClose }: WalletSheetProps) => {
   const {
     cardsRemaining,
     isSubscribed,
-    moneyAllocation,
-    setMoneyAllocation,
     refresh,
   } = useEntitlements();
   const [code, setCode] = useState('');
@@ -63,18 +61,6 @@ const WalletSheet = ({ open, onClose }: WalletSheetProps) => {
     }
   };
 
-  const handleAllocation = async (v: MoneyAllocation) => {
-    if (!user) {
-      onClose();
-      navigate('/auth?redirect=/');
-      return;
-    }
-    await setMoneyAllocation(v);
-    toast({
-      title: v === 'reinvest' ? '💚 Reinvested in Fantitos' : '🏎️ Sent to Fantito\'s Ferrari fund',
-      description: v === 'reinvest' ? 'New cards, new modes, more chaos.' : 'Vroom vroom. Thank you, legend.',
-    });
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
@@ -179,35 +165,6 @@ const WalletSheet = ({ open, onClose }: WalletSheetProps) => {
             </div>
           </section>
 
-          {/* Money allocation */}
-          <section>
-            <div className="flex items-center gap-2 mb-1">
-              <Rocket className="w-4 h-4 text-primary" />
-              <h3 className="font-display font-semibold text-sm text-foreground">Where does your money go?</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              You decide. Applies to all your future purchases.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <AllocationOption
-                active={moneyAllocation === 'reinvest'}
-                icon={<Rocket className="w-4 h-4" />}
-                title="Reinvest"
-                desc="More cards, modes & languages."
-                onClick={() => handleAllocation('reinvest')}
-              />
-              <AllocationOption
-                active={moneyAllocation === 'ferrari'}
-                icon={<Car className="w-4 h-4" />}
-                title="Fantito's Ferrari"
-                desc="Pay for the cowboy's ride. 🏎️"
-                onClick={() => handleAllocation('ferrari')}
-              />
-            </div>
-            {!user && (
-              <p className="text-[11px] text-muted-foreground mt-2">Sign in to save your choice.</p>
-            )}
-          </section>
         </div>
       </div>
     </div>
@@ -235,23 +192,5 @@ const Offer = ({
   </button>
 );
 
-const AllocationOption = ({
-  active, icon, title, desc, onClick,
-}: { active: boolean; icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`text-left p-3 rounded-lg border transition-all ${
-      active
-        ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
-        : 'border-white/[0.08] bg-background hover:border-white/20'
-    }`}
-  >
-    <div className={`flex items-center gap-2 mb-1 ${active ? 'text-primary' : 'text-foreground'}`}>
-      {icon}
-      <span className="font-display font-semibold text-sm">{title}</span>
-    </div>
-    <div className="text-[11px] text-muted-foreground leading-snug">{desc}</div>
-  </button>
-);
 
 export default WalletSheet;

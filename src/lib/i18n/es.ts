@@ -75,6 +75,8 @@ const es: TranslationKeys = {
   pregame: 'Previa',
   chillNight: 'Noche tranquila',
   vacation: 'Vacaciones',
+  afterparty: 'Fiesta posterior',
+  coffeeShop: 'Cafetería',
   birthday: 'Cumpleaños 🎂',
   firstTime: 'Primera vez juntos',
   reunion: 'Reencuentro',

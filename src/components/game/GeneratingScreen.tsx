@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState, memo } from 'react';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { cssVars } from '@/lib/css-utils';
 import { Sparkles, Zap } from 'lucide-react';
 import { Language, OnboardingState, RELATION_TYPES, VIBES } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
-import { cssVars } from '@/lib/css-utils';
-import mascot from '@/assets/mascot.webp';
 
 interface GeneratingScreenProps {
   lang: Language;
@@ -38,16 +38,6 @@ const ANALYSIS_LINES: Record<string, string[]> = {
     'Generando preguntas que arruinan amistades…',
   ],
 };
-
-const PREVIEW_CARDS = [
-  { kind: 'question',  text: 'Who in this group would survive the longest in jail?' },
-  { kind: 'challenge', text: 'Reveal your last DM.' },
-  { kind: 'vote',      text: 'Who lies the most in this room?' },
-  { kind: 'warning',   text: 'Crush probability detected.' },
-  { kind: 'system',    text: 'Betrayal scenarios generated successfully.' },
-  { kind: 'question',  text: 'Who is most likely to text their ex tonight?' },
-  { kind: 'challenge', text: 'Swap phones for 60 seconds.' },
-] as const;
 
 /* ============================================================ */
 
@@ -97,7 +87,6 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
 
   const [progress, setProgress] = useState(0);
   const [lineIdx, setLineIdx] = useState(0);
-  const [previewIdx, setPreviewIdx] = useState(0);
   const [personalSentence, setPersonalSentence] = useState('');
   const sentenceRequested = useRef(false);
 
@@ -121,11 +110,10 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
     return () => window.clearInterval(id);
   }, []);
 
-  // Rotate analysis lines + preview cards
+  // Rotate analysis lines
   useEffect(() => {
     const a = window.setInterval(() => setLineIdx(i => (i + 1) % lines.length), 1400);
-    const b = window.setInterval(() => setPreviewIdx(i => (i + 1) % PREVIEW_CARDS.length), 1900);
-    return () => { window.clearInterval(a); window.clearInterval(b); };
+    return () => { window.clearInterval(a); };
   }, [lines.length]);
 
   // Haptic milestones
@@ -172,12 +160,6 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
   const ready = progress >= 95 && !!personalSentence;
   const intensity = Math.min(1, progress / 100);
 
-  const card = PREVIEW_CARDS[previewIdx];
-  const cardKindLabel =
-    card.kind === 'warning'   ? '⚠ alert' :
-    card.kind === 'challenge' ? '🎯 challenge' :
-    card.kind === 'vote'      ? '🗳 vote' :
-    card.kind === 'system'    ? '⚡ system' : '❓ question';
 
   return (
     <div className="relative min-h-[100dvh] max-w-[430px] mx-auto bg-background overflow-hidden">
@@ -210,91 +192,33 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
 
       <div className={`relative flex flex-col items-center justify-center min-h-[100dvh] px-6 py-8 gap-5 ${rtl ? 'direction-rtl' : ''}`}>
 
-        {/* ====== MASCOT — observing the group ====== */}
-        <div className="relative">
-          <div
-            className="absolute inset-0 rounded-full vs-pulse-glow"
-            style={{ filter: 'blur(8px)', background: 'hsl(var(--primary) / 0.4)' }}
-          />
-          <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-primary/40 vs-float"
-               style={{ boxShadow: '0 0 36px -6px hsl(var(--primary) / 0.7)' }}>
-            <img
-              src={mascot}
-              alt="Fantito"
-              className="w-full h-full object-cover"
-              loading="eager"
-              width={512}
-              height={512}
-            />
-            {/* scanning sweep */}
-            <div
-              className="absolute inset-x-0 h-6 pointer-events-none"
-              style={{
-                top: `${(progress % 100)}%`,
-                background: 'linear-gradient(180deg, transparent, hsl(var(--primary) / 0.5), transparent)',
-                transition: 'top 0.3s linear',
-                mixBlendMode: 'screen',
-              }}
-            />
+        {/* ====== AI-GENERATED PERSONAL SENTENCE — featured in the main panel ====== */}
+        <div
+          className="relative w-full rounded-2xl p-5 border border-primary/40 min-h-[140px] flex items-center justify-center text-center"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--primary) / 0.22))',
+            boxShadow: '0 0 28px -8px hsl(var(--primary) / 0.55)',
+          }}
+        >
+          <div className="absolute top-3 left-3 inline-flex items-center gap-1 text-[9.5px] font-display font-bold uppercase tracking-widest text-primary">
+            <Sparkles className="w-3 h-3" /> Fantito
           </div>
-          {/* eye glints */}
-          <span className="absolute top-9 left-7 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          <span className="absolute top-9 right-7 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"
-                style={{ animationDelay: '180ms' }} />
-        </div>
-
-        {/* ====== AI-GENERATED PERSONAL SENTENCE (kept) ====== */}
-        <div className="min-h-[64px] w-full flex items-center justify-center">
           {personalSentence ? (
-            <p className="font-display text-[15px] font-semibold text-foreground text-center italic leading-snug px-2 vs-rise">
-              “{personalSentence}”
+            <p className="font-display text-[15px] font-semibold text-foreground italic leading-snug px-2 vs-rise">
+              "{personalSentence}"
             </p>
           ) : (
-            <p className="font-display text-sm text-muted-foreground text-center vs-shimmer-text">
+            <p className="font-display text-sm text-muted-foreground vs-shimmer-text">
               Fantito is reading the room…
             </p>
           )}
         </div>
 
-        {/* ====== LIVE PREVIEW CARD (rotating) ====== */}
-        <div className="relative w-full h-[92px]">
-          {PREVIEW_CARDS.map((c, i) => {
-            const active = i === previewIdx;
-            return (
-              <div
-                key={i}
-                className={`absolute inset-0 rounded-2xl p-3.5 border transition-all duration-500
-                  ${active
-                    ? 'opacity-100 translate-y-0 scale-100 border-primary/40'
-                    : 'opacity-0 translate-y-2 scale-95 border-white/[0.08] pointer-events-none'}`}
-                style={{
-                  background:
-                    c.kind === 'warning'
-                      ? 'linear-gradient(135deg, hsl(var(--card)), hsl(0 80% 25% / 0.45))'
-                      : c.kind === 'challenge'
-                      ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--accent) / 0.28))'
-                      : c.kind === 'system'
-                      ? 'linear-gradient(135deg, hsl(var(--card)), hsl(160 60% 30% / 0.35))'
-                      : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--primary) / 0.25))',
-                  boxShadow: active ? '0 0 22px -8px hsl(var(--primary) / 0.55)' : undefined,
-                }}
-              >
-                <div className="text-[9.5px] font-display font-bold uppercase tracking-widest text-primary mb-1">
-                  {cardKindLabel}
-                </div>
-                <p className="font-display font-bold text-[13px] text-foreground leading-snug line-clamp-3">
-                  {card.text}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ====== CHAOS METER ====== */}
+        {/* ====== PREPARATIONS METER ====== */}
         <div className="w-full">
           <div className="flex items-end justify-between mb-1.5">
             <span className="text-[10px] font-display font-bold uppercase tracking-widest text-muted-foreground">
-              Chaos generation
+              Preparations
             </span>
             <span className="font-display font-black text-sm text-primary">
               {Math.floor(progress)}% · {chaosLabel}
@@ -333,16 +257,10 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
           </div>
         )}
 
-        {ready && (
-          <div className="vs-rise flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-widest text-primary">
-            <Zap className="w-3 h-3" />
-            Personalized chaos generated
-            <Sparkles className="w-3 h-3" />
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default memo(GeneratingScreen);
+export default GeneratingScreen;
+

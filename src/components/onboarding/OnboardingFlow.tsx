@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { OnboardingState, Language, Vibe, Intensity, Player, Relation, ConsumptionType, GameMode } from '@/lib/onboarding-types';
+import { OnboardingState, Language, Vibe, Intensity, Player, Relation, ConsumptionType, GameMode, GameType, Timing } from '@/lib/onboarding-types';
 import { GameCard, GenerationStatus } from '@/lib/game-types';
 import { generateGameCards, generateRestOfCards } from '@/lib/card-generation-service';
 import type { ComposedPrompt } from '@/lib/prompt-engine';
@@ -23,13 +23,14 @@ const INITIAL_STATE: OnboardingState = {
   relations: [],
   vibes: [],
   selectedConsumptions: [],
-  
   consumptionLevel: 3,
   gameMode: 'normal',
   contextState: '',
   hostPlayerId: undefined,
   driverPlayerId: undefined,
   freeTextDetails: '',
+  selectedGameTypes: [],
+  timing: '',
   step: 0,
 };
 
@@ -216,6 +217,8 @@ const OnboardingFlow = () => {
             hostPlayerId={state.hostPlayerId}
             driverPlayerId={state.driverPlayerId}
             detailsValue={state.freeTextDetails}
+            selectedGameTypes={state.selectedGameTypes}
+            timing={state.timing}
             onToggleVibe={toggleVibe}
             onToggleConsumption={(c: ConsumptionType) => {
               const cur = state.selectedConsumptions;
@@ -225,13 +228,18 @@ const OnboardingFlow = () => {
             onGameModeChange={(m: GameMode) => updateState('gameMode', m)}
             onContextChange={(v: string) => {
               updateState('contextState', v);
-              // Reset host/driver when scene type changes
               if (v !== 'house-party' && v !== 'chill-night') updateState('hostPlayerId', undefined);
               if (v !== 'road-trip') updateState('driverPlayerId', undefined);
             }}
             onHostChange={(id?: string) => updateState('hostPlayerId', id)}
             onDriverChange={(id?: string) => updateState('driverPlayerId', id)}
             onDetailsChange={(v: string) => updateState('freeTextDetails', v)}
+            onToggleGameType={(g: GameType) => {
+              const cur = state.selectedGameTypes;
+              updateState('selectedGameTypes', cur.includes(g) ? cur.filter(x => x !== g) : [...cur, g]);
+            }}
+            onClearGameTypes={() => updateState('selectedGameTypes', [])}
+            onTimingChange={(v: Timing) => updateState('timing', v)}
             onNext={next}
             onBack={back}
           />
@@ -244,6 +252,7 @@ const OnboardingFlow = () => {
             state={state}
             onBack={back}
             onStart={handleStartGame}
+            onJumpToStep={(s: number) => updateState('step', s)}
           />
         );
       default:
