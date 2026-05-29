@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, memo } from 'react';
 import { GameCard } from '@/lib/game-types';
 import { GameMode, Language } from '@/lib/onboarding-types';
 import { Mood } from '@/lib/card-mood';
@@ -331,4 +331,4 @@ const Header = ({ mood, label, count, cardId }: { mood: Mood; label: string; cou
   </div>
 );
 
-export default VoteCard;
+export default memo(VoteCard);
