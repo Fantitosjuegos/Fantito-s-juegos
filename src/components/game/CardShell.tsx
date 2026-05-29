@@ -1,6 +1,7 @@
 import { ReactNode, useRef, useState, useCallback } from 'react';
 import { Star } from 'lucide-react';
 import { Mood } from '@/lib/card-mood';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 interface CardShellProps {
   mood: Mood;
@@ -69,8 +70,13 @@ const CardShell = ({
   const onTouchEnd = () => {
     if (disableSwipe) return;
     setIsDragging(false);
-    if (dragX > SWIPE_THRESHOLD) done();
-    else if (dragX < -SWIPE_THRESHOLD) skip();
+    if (dragX > SWIPE_THRESHOLD) {
+  Haptics.impact({ style: ImpactStyle.Medium });
+  done();
+} else if (dragX < -SWIPE_THRESHOLD) {
+  Haptics.impact({ style: ImpactStyle.Light });
+  skip();
+}
     else setDragX(0);
   };
   const onMouseDown = (e: React.MouseEvent) => {
@@ -84,8 +90,13 @@ const CardShell = ({
       document.removeEventListener('mousemove', move);
       document.removeEventListener('mouseup', up);
       setDragX(prev => {
-        if (prev > SWIPE_THRESHOLD) done();
-        else if (prev < -SWIPE_THRESHOLD) skip();
+        if (prev > SWIPE_THRESHOLD) {
+  Haptics.impact({ style: ImpactStyle.Medium });
+  done();
+} else if (prev < -SWIPE_THRESHOLD) {
+  Haptics.impact({ style: ImpactStyle.Light });
+  skip();
+}
         return 0;
       });
     };

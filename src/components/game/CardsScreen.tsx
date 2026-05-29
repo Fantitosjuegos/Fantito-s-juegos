@@ -21,6 +21,7 @@ import QuizCard from './cards/QuizCard';
 import MinigameCard from './cards/MinigameCard';
 import SessionRecapScreen, { SessionStats } from './SessionRecapScreen';
 import WalletSheet from '../WalletSheet';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 export interface PlayerLite { name: string; emoji: string }
 
@@ -75,6 +76,12 @@ const CardsScreen = ({
     refreshedRef.current = true;
     refresh().catch(() => {});
   }, [user, isSubscribed, refresh]);
+   useEffect(() => {
+  KeepAwake.keepAwake();
+  return () => {
+    KeepAwake.allowSleep();
+  };
+}, []);
 
   // Reset live feedback buffer at the start of each new session
   useEffect(() => { resetLiveFeedback(); }, []);
