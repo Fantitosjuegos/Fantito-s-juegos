@@ -208,7 +208,33 @@ const PlayersRelationsScreen = ({ step, lang, players, relations, onPlayersChang
             return (<div key={p.id} data-player-bubble role="button" tabIndex={0} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex flex-col items-center justify-center text-2xl select-none ${isSelected?'ring-2 ring-primary':''} ${isDragging?'cursor-grabbing':'cursor-grab'}`} style={{left:pos.x,top:pos.y,width:64,height:64,touchAction:'none',zIndex:isDragging?30:10,transform:`translate(-50%,-50%) scale(${isDragging?1.1:1})`,background:'radial-gradient(circle at 30% 30%, hsl(var(--card)), hsl(var(--background)))',border:'1px solid hsl(var(--border))',animation:isDragging?undefined:(recentBounce?'pr-bubble-bounce .4s ease-out':(isSelected?'pr-ring-pulse 1.4s ease-in-out infinite':'pr-bubble-in .3s ease-out')),boxShadow:isDragging?'0 10px 28px rgba(0,0,0,0.45)':(isSelected?'0 0 18px hsl(var(--primary)/0.5)':'0 4px 14px rgba(0,0,0,0.3)')}}><span style={{lineHeight:1,pointerEvents:'none'}}>{p.emoji}</span><span className="absolute -bottom-5 text-[10px] font-display font-bold text-foreground/90 bg-card/70 backdrop-blur px-1.5 py-0.5 rounded-full whitespace-nowrap max-w-[80px] truncate" style={{pointerEvents:'none'}}>{p.name}</span></div>);
           })}
 
-          {players.length<2&&<div className="absolute inset-0 flex items-center justify-center pointer-events-none"><p className="text-xs text-muted-foreground italic">{t(lang,'addAtLeast2')}</p></div>}
+          {/* Empty state — animated tap-and-link tutorial */}
+          {players.length < 2 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
+              <style>{`
+                @keyframes tut-tap { 0%,55%,100% { transform: translate(0,0) scale(1); opacity:.85 } 25% { transform: translate(-46px,-6px) scale(.9); opacity:1 } 60% { opacity:.85 } 80% { transform: translate(46px,-6px) scale(.9); opacity:1 } }
+                @keyframes tut-ring { 0%,100% { transform: scale(1); opacity:.55 } 50% { transform: scale(1.3); opacity:0 } }
+                @keyframes tut-pop { 0%,100% { transform: scale(1) } 50% { transform: scale(1.08) } }
+              `}</style>
+              <div className="relative w-[180px] h-[80px]">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-primary/40 bg-card/60 flex items-center justify-center text-xl" style={{ animation: 'tut-pop 2.4s ease-in-out infinite' }}>
+                  😎
+                  <span className="absolute inset-0 rounded-full border-2 border-primary/60" style={{ animation: 'tut-ring 2.4s ease-out infinite' }} />
+                </div>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-primary/40 bg-card/60 flex items-center justify-center text-xl" style={{ animation: 'tut-pop 2.4s ease-in-out infinite .8s' }}>
+                  🫦
+                  <span className="absolute inset-0 rounded-full border-2 border-primary/60" style={{ animation: 'tut-ring 2.4s ease-out infinite .8s' }} />
+                </div>
+                <div className="absolute left-12 right-12 top-1/2 -translate-y-1/2 h-px border-t border-dashed border-primary/40" />
+                <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 text-2xl" style={{ animation: 'tut-tap 2.4s ease-in-out infinite' }}>
+                  👆
+                </div>
+              </div>
+              <p className="text-xs text-foreground/80 font-display font-semibold text-center">
+                Tap to add players · tap two to link them
+              </p>
+            </div>
+          )}
           {players.length>=2&&relations.length===0&&<div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] text-muted-foreground bg-card/70 backdrop-blur px-2.5 py-1 rounded-full pointer-events-none">{t(lang,'tapTwoPlayers')||'Tap two players to link them'}</div>}
           <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1 items-center pointer-events-none">
             {previews.map(pv=>(<div key={pv.id} className="text-[11px] font-display font-semibold px-3 py-1.5 rounded-full bg-accent/15 border border-accent/30 text-accent" style={{animation:'pr-preview-in .3s ease-out'}}>{pv.text}</div>))}

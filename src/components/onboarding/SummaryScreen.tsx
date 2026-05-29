@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import { Wand2 } from 'lucide-react';
-import { OnboardingState, Language, VIBES, GAME_MODES, RELATION_TYPES } from '@/lib/onboarding-types';
-import { cssVars } from '@/lib/css-utils';
-import { isRTL } from '@/lib/translations';
+import { Wand2, Pencil, Heart } from 'lucide-react';
+import { OnboardingState, Language, VIBES, GAME_MODES, CONSUMPTION_TYPES } from '@/lib/onboarding-types';
+import type { TranslationKey } from '@/lib/translations';
+import { isRTL, t as tr } from '@/lib/translations';
 import OnboardingLayout from './OnboardingLayout';
-import MascotBubble from './MascotBubble';
 
 interface SummaryScreenProps {
   step: number;
@@ -12,147 +11,208 @@ interface SummaryScreenProps {
   state: OnboardingState;
   onBack: () => void;
   onStart: () => void;
+  /** Jump back to a previous onboarding step to edit a section. */
+  onJumpToStep: (step: number) => void;
 }
 
 const I18N: Record<Language, {
   ready: string; launch: string; tonight: string;
-  mode: string; vibes: string; intensity: string; scene: string;
-  consumption: string; players: string; host: string; driver: string;
-  none: string; lvl: string;
+  mode: string; vibes: string; scene: string;
+  consumption: string; details: string; players: string;
+  none: string; lvl: string; tapToEdit: string; squad: string;
 }> = {
-  en: { ready: 'All set. Tap to launch.', launch: 'Launch', tonight: "Tonight's setup", mode: 'Mode', vibes: 'Vibes', intensity: 'Intensity', scene: 'Scene', consumption: 'Consumption', players: 'Players', host: 'Host', driver: 'Driver', none: '—', lvl: 'lvl' },
-  es: { ready: 'Todo listo. Toca para empezar.', launch: 'Empezar', tonight: 'Tu partida', mode: 'Modo', vibes: 'Vibras', intensity: 'Intensidad', scene: 'Escena', consumption: 'Consumo', players: 'Jugadores', host: 'Anfitrión', driver: 'Conductor', none: '—', lvl: 'nv' },
-  fr: { ready: 'Tout est prêt. Touche pour lancer.', launch: 'Lancer', tonight: 'Ta partie', mode: 'Mode', vibes: 'Ambiance', intensity: 'Intensité', scene: 'Scène', consumption: 'Consommation', players: 'Joueurs', host: 'Hôte', driver: 'Conducteur', none: '—', lvl: 'niv' },
-  de: { ready: 'Bereit. Tippe zum Starten.', launch: 'Start', tonight: 'Deine Runde', mode: 'Modus', vibes: 'Stimmung', intensity: 'Intensität', scene: 'Szene', consumption: 'Konsum', players: 'Spieler', host: 'Gastgeber', driver: 'Fahrer', none: '—', lvl: 'lv' },
-  pt: { ready: 'Tudo pronto. Toca para começar.', launch: 'Começar', tonight: 'A tua partida', mode: 'Modo', vibes: 'Vibes', intensity: 'Intensidade', scene: 'Cena', consumption: 'Consumo', players: 'Jogadores', host: 'Anfitrião', driver: 'Condutor', none: '—', lvl: 'nv' },
-  it: { ready: 'Tutto pronto. Tocca per iniziare.', launch: 'Avvia', tonight: 'La tua partita', mode: 'Modalità', vibes: 'Vibe', intensity: 'Intensità', scene: 'Scena', consumption: 'Consumo', players: 'Giocatori', host: 'Padrone di casa', driver: 'Autista', none: '—', lvl: 'liv' },
-  ar: { ready: 'كل شيء جاهز. اضغط للبدء.', launch: 'ابدأ', tonight: 'إعداد الليلة', mode: 'الوضع', vibes: 'الأجواء', intensity: 'الشدة', scene: 'المشهد', consumption: 'الاستهلاك', players: 'اللاعبون', host: 'المضيف', driver: 'السائق', none: '—', lvl: 'مس' },
+  en: { ready: 'Press start when ready.', launch: 'Start the chaos', tonight: "Tonight's setup", mode: 'Mode', vibes: 'Vibes', scene: 'Scene', consumption: 'Consumption', details: 'Details', players: 'Players', none: '—', lvl: 'lvl', tapToEdit: 'Tap to edit', squad: 'Squad' },
+  es: { ready: 'Pulsa start cuando estés listo.', launch: 'Empezar el caos', tonight: 'Tu partida', mode: 'Modo', vibes: 'Vibras', scene: 'Escena', consumption: 'Consumo', details: 'Detalles', players: 'Jugadores', none: '—', lvl: 'nv', tapToEdit: 'Toca para editar', squad: 'Equipo' },
+  fr: { ready: 'Appuie sur start quand tu es prêt.', launch: 'Lancer le chaos', tonight: 'Ta partie', mode: 'Mode', vibes: 'Ambiance', scene: 'Scène', consumption: 'Consommation', details: 'Détails', players: 'Joueurs', none: '—', lvl: 'niv', tapToEdit: 'Touche pour modifier', squad: 'Équipe' },
+  de: { ready: 'Drück Start, wenn du bereit bist.', launch: 'Chaos starten', tonight: 'Deine Runde', mode: 'Modus', vibes: 'Stimmung', scene: 'Szene', consumption: 'Konsum', details: 'Details', players: 'Spieler', none: '—', lvl: 'lv', tapToEdit: 'Tippen zum Bearbeiten', squad: 'Crew' },
+  pt: { ready: 'Carrega start quando estiveres pronto.', launch: 'Começar o caos', tonight: 'A tua partida', mode: 'Modo', vibes: 'Vibes', scene: 'Cena', consumption: 'Consumo', details: 'Detalhes', players: 'Jogadores', none: '—', lvl: 'nv', tapToEdit: 'Toca para editar', squad: 'Equipa' },
+  it: { ready: 'Premi start quando sei pronto.', launch: 'Avvia il caos', tonight: 'La tua partita', mode: 'Modalità', vibes: 'Vibe', scene: 'Scena', consumption: 'Consumo', details: 'Dettagli', players: 'Giocatori', none: '—', lvl: 'liv', tapToEdit: 'Tocca per modificare', squad: 'Squadra' },
+  ar: { ready: 'اضغط ابدأ عندما تكون جاهزاً.', launch: 'أطلق الفوضى', tonight: 'إعداد الليلة', mode: 'الوضع', vibes: 'الأجواء', scene: 'المشهد', consumption: 'الاستهلاك', details: 'تفاصيل', players: 'اللاعبون', none: '—', lvl: 'مس', tapToEdit: 'اضغط للتعديل', squad: 'الفريق' },
 };
 
-const SummaryScreen = ({ step, lang, state, onBack, onStart }: SummaryScreenProps) => {
+const SCENE_LABELS: Record<string, { emoji: string; key: 'houseParty'|'atABar'|'roadTrip'|'pregame'|'chillNight'|'vacation'|'afterparty'|'coffeeShop' }> = {
+  'house-party': { emoji: '🏠', key: 'houseParty' },
+  'bar':         { emoji: '🍻', key: 'atABar' },
+  'road-trip':   { emoji: '🚗', key: 'roadTrip' },
+  'pregame':     { emoji: '🎉', key: 'pregame' },
+  'chill-night': { emoji: '🛋️', key: 'chillNight' },
+  'vacation':    { emoji: '🌴', key: 'vacation' },
+  'afterparty':  { emoji: '🌙', key: 'afterparty' },
+  'coffee-shop': { emoji: '☕', key: 'coffeeShop' },
+};
+
+const SummaryScreen = ({ step, lang, state, onBack, onStart, onJumpToStep }: SummaryScreenProps) => {
   const rtl = isRTL(lang);
   const t = I18N[lang] ?? I18N.en;
 
-  const playerLayout = useMemo(() => {
-    const n = state.players.length;
-    const cx = 50, cy = 50, r = n <= 4 ? 26 : 32;
-    return state.players.map((p, i) => {
-      const angle = (i / Math.max(1, n)) * Math.PI * 2 - Math.PI / 2;
-      return { ...p, x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
-    });
-  }, [state.players]);
-
-  const idIndex = useMemo(() => {
-    const m = new Map<string, { x: number; y: number }>();
-    playerLayout.forEach(p => m.set(p.id, { x: p.x, y: p.y }));
-    return m;
-  }, [playerLayout]);
-
-  const modeLabel = GAME_MODES.find(m => m.id === state.gameMode);
-  const vibeChips = state.vibes
-    .map(v => VIBES.find(vv => vv.id === v))
-    .filter(Boolean)
-    .map(v => `${v!.emoji} ${v!.labelKey}`)
-    .join(' · ');
-  const consumptionLabel = state.selectedConsumptions.length
-    ? state.selectedConsumptions.join(' · ') + ` · ${t.lvl} ${state.consumptionLevel}/5`
-    : t.none;
-  const sceneLabel = state.contextState || t.none;
-  const host = state.hostPlayerId ? state.players.find(p => p.id === state.hostPlayerId) : undefined;
-  const driver = state.driverPlayerId ? state.players.find(p => p.id === state.driverPlayerId) : undefined;
+  const modeInfo = GAME_MODES.find(m => m.id === state.gameMode);
+  const sceneInfo = state.contextState ? SCENE_LABELS[state.contextState] : undefined;
   const detailsText = state.freeTextDetails?.trim();
+
+  // Pair relations per player to render small heart-badge under the avatar.
+  const relationCountById = useMemo(() => {
+    const m = new Map<string, number>();
+    state.relations.forEach(r => {
+      m.set(r.player1Id, (m.get(r.player1Id) ?? 0) + 1);
+      m.set(r.player2Id, (m.get(r.player2Id) ?? 0) + 1);
+    });
+    return m;
+  }, [state.relations]);
 
   return (
     <OnboardingLayout step={step} onBack={onBack}>
-      <div className="vs-atmosphere" style={cssVars({ '--vs-intensity': '0.6' })} />
+      <style>{`
+        @keyframes sm-scan { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } }
+        @keyframes sm-pulse-glow { 0%,100% { box-shadow: 0 0 0 0 hsl(var(--primary)/0.35); } 50% { box-shadow: 0 0 26px 4px hsl(var(--primary)/0.5); } }
+        @keyframes sm-blink { 0%,60%,100% { opacity: 1 } 80% { opacity: .2 } }
+        @keyframes sm-card-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes sm-tilt { 0%,100% { transform: rotate(-1deg) } 50% { transform: rotate(1deg) } }
+        .sm-card { animation: sm-card-in .4s ease-out both; }
+        .sm-press { transition: transform .12s ease; }
+        .sm-press:active { transform: scale(.97) }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
 
-      <div className={`relative flex-1 flex flex-col gap-4 pt-2 overflow-y-auto ${rtl ? 'direction-rtl' : ''}`}>
-        <MascotBubble message={t.ready} size="sm" />
-
-        {/* ===== Player ring graphic ===== */}
-        {state.players.length > 0 && (
-          <div className="vs-rise relative w-full aspect-[2/1] rounded-2xl border border-primary/25 bg-card overflow-hidden"
-               style={{ boxShadow: '0 0 40px -16px hsl(var(--primary) / 0.5)' }}>
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="none">
-              {state.relations.map((r, i) => {
-                const pa = idIndex.get(r.player1Id);
-                const pb = idIndex.get(r.player2Id);
-                if (!pa || !pb) return null;
-                const stroke =
-                  r.type === 'lovers' || r.type === 'crush' || r.type === 'flirtyrel'
-                    ? 'hsl(var(--primary))'
-                    : r.type === 'beef' || r.type === 'enemies'
-                    ? 'hsl(0 80% 60%)'
-                    : 'hsl(var(--accent))';
-                return (
-                  <line
-                    key={i}
-                    x1={pa.x} y1={pa.y / 2}
-                    x2={pb.x} y2={pb.y / 2}
-                    stroke={stroke} strokeWidth={0.5} strokeDasharray="1.2 1" opacity={0.7}
-                    style={{ filter: `drop-shadow(0 0 2px ${stroke})` }}
-                  >
-                    <animate attributeName="stroke-dashoffset" from="0" to="-12" dur="3s" repeatCount="indefinite" />
-                  </line>
-                );
-              })}
-            </svg>
-
-            {playerLayout.map((p, i) => (
-              <div
-                key={p.id}
-                className="absolute -translate-x-1/2 -translate-y-1/2 vs-float"
-                style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${i * 0.18}s` }}
-              >
-                <div
-                  className="w-11 h-11 rounded-full border bg-background/80 backdrop-blur flex items-center justify-center text-xl shadow-soft"
-                  style={{
-                    borderColor: 'hsl(var(--primary) / 0.5)',
-                    boxShadow: '0 0 18px -2px hsl(var(--primary) / 0.6)',
-                  }}
-                >
-                  {p.emoji}
-                </div>
-                <div className="mt-1 text-center text-[10px] font-display font-semibold text-foreground/90 max-w-[68px] truncate mx-auto">
-                  {p.name}
-                </div>
-              </div>
-            ))}
+      <div className={`relative flex-1 flex flex-col gap-3 pt-1 overflow-y-auto ${rtl ? 'direction-rtl' : ''}`}>
+        {/* ===== Arcade header ===== */}
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/40 bg-primary/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" style={{ animation: 'sm-blink 1.4s ease-in-out infinite' }} />
+            <span className="text-[10px] font-display font-black uppercase tracking-[0.22em] text-primary">
+              {t.tonight}
+            </span>
           </div>
-        )}
-
-        {/* ===== Choices grid ===== */}
-        <div className="vs-rise" style={{ animationDelay: '60ms' }}>
-          <h3 className="text-[11px] font-display font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-            {t.tonight}
-          </h3>
-          <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-            <Stat label={t.mode} value={modeLabel ? `${modeLabel.emoji} ${modeLabel.labelKey}` : state.gameMode} />
-            <Stat label={t.intensity} value={`${state.consumptionLevel}/5`} />
-            <Stat label={t.vibes} value={vibeChips || t.none} />
-            <Stat label={t.scene} value={sceneLabel} />
-            <Stat label={t.consumption} value={consumptionLabel} />
-            <Stat label={t.players} value={String(state.players.length)} />
-            {host && <Stat label={t.host} value={`${host.emoji} ${host.name}`} />}
-            {driver && <Stat label={t.driver} value={`${driver.emoji} ${driver.name}`} />}
-          </div>
-          {detailsText && (
-            <p className="mt-2 text-[11px] italic text-muted-foreground/90 px-1">"{detailsText}"</p>
-          )}
+          <p className="text-[11px] text-muted-foreground mt-1.5">{t.ready}</p>
         </div>
 
-        {/* CTA */}
-        <div className="mt-auto pt-3 pb-1">
+        {/* ===== Squad frame — horizontal scroll roster ===== */}
+        {state.players.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onJumpToStep(1)}
+            aria-label={t.tapToEdit}
+            className="sm-card sm-press relative w-full rounded-2xl border-2 border-primary/40 bg-gradient-to-b from-card to-background overflow-hidden text-left p-3"
+            style={{ boxShadow: 'inset 0 0 30px hsl(var(--primary)/0.1), 0 12px 36px -22px hsl(var(--primary)/0.6)' }}
+          >
+            {/* CRT scanline */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 w-1/3 opacity-30"
+              style={{
+                background: 'linear-gradient(90deg, transparent, hsl(var(--primary)/0.18), transparent)',
+                animation: 'sm-scan 3.6s linear infinite',
+              }}
+            />
+
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] font-display font-black uppercase tracking-[0.22em] text-primary/90">
+                  {t.squad}
+                </span>
+                <span className="text-[10px] font-display font-bold text-muted-foreground">
+                  · {state.players.length}/12
+                </span>
+              </div>
+              <span className="inline-flex items-center gap-1 text-[9px] font-display font-bold uppercase tracking-wider text-muted-foreground">
+                <Pencil className="w-2.5 h-2.5" /> {t.tapToEdit}
+              </span>
+            </div>
+
+            <div className="flex items-end gap-3 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+              {state.players.map((p, i) => {
+                const rels = relationCountById.get(p.id) ?? 0;
+                return (
+                  <div key={p.id} className="flex flex-col items-center shrink-0 w-[60px]" style={{ animation: `sm-card-in .4s ease-out ${i * 60}ms both` }}>
+                    <div
+                      className="relative w-12 h-12 rounded-xl border border-primary/40 bg-background/80 backdrop-blur flex items-center justify-center text-2xl"
+                      style={{ boxShadow: '0 0 14px -4px hsl(var(--primary)/0.55)' }}
+                    >
+                      {p.emoji}
+                      {rels > 0 && (
+                        <span className="absolute -bottom-1.5 -right-1.5 inline-flex items-center gap-0.5 text-[8.5px] font-display font-black bg-primary text-primary-foreground rounded-full px-1 py-px border border-background">
+                          <Heart className="w-2 h-2 fill-current" />
+                          {rels}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2 text-center text-[10px] font-display font-bold text-foreground/90 max-w-[60px] truncate">
+                      {p.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </button>
+        )}
+
+        {/* ===== Choice cards (tap to edit) — menu style ===== */}
+        <div className="grid grid-cols-2 gap-2">
+          <SummaryCard
+            label={t.mode}
+            emoji={modeInfo?.emoji ?? '🎉'}
+            value={modeInfo ? tr(lang, modeInfo.labelKey) : state.gameMode}
+            onClick={() => onJumpToStep(1)}
+            delay={40}
+          />
+          <SummaryCard
+            label={t.vibes}
+            emoji="✨"
+            value={
+              state.vibes.length
+                ? state.vibes
+                    .map(v => VIBES.find(vv => vv.id === v))
+                    .filter(Boolean)
+                    .map(v => v!.emoji)
+                    .join(' ')
+                : t.none
+            }
+            onClick={() => onJumpToStep(2)}
+            delay={80}
+          />
+          <SummaryCard
+            label={t.scene}
+            emoji={sceneInfo?.emoji ?? '🎬'}
+            value={sceneInfo ? tr(lang, sceneInfo.key as TranslationKey) : t.none}
+            onClick={() => onJumpToStep(2)}
+            delay={120}
+          />
+          <SummaryCard
+            label={t.consumption}
+            emoji="🍻"
+            value={
+              state.selectedConsumptions.length
+                ? `${state.selectedConsumptions
+                    .map(c => CONSUMPTION_TYPES.find(x => x.id === c)?.emoji)
+                    .join(' ')} · ${t.lvl} ${state.consumptionLevel}/5`
+                : t.none
+            }
+            onClick={() => onJumpToStep(2)}
+            delay={160}
+          />
+          <SummaryCard
+            label={t.details}
+            emoji="📝"
+            value={detailsText ? (detailsText.length > 38 ? detailsText.slice(0, 36) + '…' : detailsText) : t.none}
+            onClick={() => onJumpToStep(2)}
+            delay={200}
+            wide
+          />
+        </div>
+
+        {/* CTA — arcade Start button */}
+        <div className="mt-auto pt-2 pb-1">
           <button
             onClick={onStart}
-            className="relative w-full overflow-hidden rounded-xl py-4 font-display font-bold text-base text-primary-foreground transition-all active:scale-[0.98] vs-pulse-glow"
+            className="relative w-full overflow-hidden rounded-2xl py-4 font-display font-black text-base uppercase tracking-[0.18em] text-primary-foreground transition-all active:scale-[0.98]"
             style={{
               background: 'linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)',
+              animation: 'sm-pulse-glow 2.4s ease-in-out infinite',
             }}
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Wand2 className="w-4 h-4" />
-              {t.launch}
+              ▶ {t.launch}
             </span>
           </button>
         </div>
@@ -161,15 +221,35 @@ const SummaryScreen = ({ step, lang, state, onBack, onStart }: SummaryScreenProp
   );
 };
 
-const Stat = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-background/40 border border-white/[0.06]">
-    <span className="text-[9.5px] font-display font-bold uppercase tracking-wider text-muted-foreground truncate">
-      {label}
-    </span>
-    <span className="text-[11px] font-display font-bold text-foreground truncate">
-      {value}
-    </span>
-  </div>
+const SummaryCard = ({
+  label, emoji, value, onClick, delay = 0, wide = false,
+}: {
+  label: string; emoji: string; value: string; onClick: () => void; delay?: number; wide?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`sm-card sm-press group relative text-left rounded-xl border border-primary/20 bg-card hover:border-primary/50 transition-colors p-3 overflow-hidden ${wide ? 'col-span-2' : ''}`}
+    style={{ animationDelay: `${delay}ms`, boxShadow: 'inset 0 0 12px hsl(var(--primary)/0.06)' }}
+  >
+    <span
+      aria-hidden
+      className="absolute top-0 right-0 w-1 h-full"
+      style={{ background: 'linear-gradient(180deg, hsl(var(--primary)/0.5), transparent)' }}
+    />
+    <div className="flex items-start gap-2.5">
+      <span className="text-2xl leading-none mt-0.5">{emoji}</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[9.5px] font-display font-black uppercase tracking-[0.18em] text-primary/80">
+          {label}
+        </div>
+        <div className="text-[13px] font-display font-bold text-foreground truncate mt-0.5">
+          {value}
+        </div>
+      </div>
+      <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
+    </div>
+  </button>
 );
 
 export default SummaryScreen;

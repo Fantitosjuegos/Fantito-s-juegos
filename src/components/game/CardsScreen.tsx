@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cardToMood } from '@/lib/card-mood';
 import { toast } from '@/hooks/use-toast';
 
-import mascot from '@/assets/mascot.webp';
+
 import AtmosphereLayer from './AtmosphereLayer';
 import CardShell from './CardShell';
 import QuestionCard from './cards/QuestionCard';
@@ -21,7 +21,6 @@ import QuizCard from './cards/QuizCard';
 import MinigameCard from './cards/MinigameCard';
 import SessionRecapScreen, { SessionStats } from './SessionRecapScreen';
 import WalletSheet from '../WalletSheet';
-import { KeepAwake } from '@capacitor-community/keep-awake';
 
 export interface PlayerLite { name: string; emoji: string }
 
@@ -76,12 +75,6 @@ const CardsScreen = ({
     refreshedRef.current = true;
     refresh().catch(() => {});
   }, [user, isSubscribed, refresh]);
-   useEffect(() => {
-  KeepAwake.keepAwake();
-  return () => {
-    KeepAwake.allowSleep();
-  };
-}, []);
 
   // Reset live feedback buffer at the start of each new session
   useEffect(() => { resetLiveFeedback(); }, []);
@@ -197,13 +190,12 @@ const CardsScreen = ({
 
       {/* Header */}
       <div className="relative flex items-center gap-3 px-5 pt-4 pb-2 z-10">
-        <img src={mascot} alt="Fantito" className="w-10 h-10 object-cover rounded-lg border border-white/[0.08]" loading="lazy" width={512} height={512} />
         <div className="flex-1">
           <p className="font-display text-sm font-semibold text-foreground">
-            {cards.length} {labels.cardsReady}
+            {(moreCardsLoading ? Math.max(cards.length, 25) : cards.length)} {labels.cardsReady}
           </p>
           <p className="text-xs text-muted-foreground">
-            {Math.min(currentIndex + 1, cards.length)} {labels.of} {cards.length}
+            {Math.min(currentIndex + 1, cards.length)} {labels.of} {(moreCardsLoading ? Math.max(cards.length, 25) : cards.length)}
           </p>
         </div>
         {isSubscribed ? (
@@ -262,7 +254,7 @@ const CardsScreen = ({
           <div
             className="h-full rounded-full transition-all duration-300"
             style={{
-              width: `${(Math.min(currentIndex + 1, cards.length) / cards.length) * 100}%`,
+              width: `${(Math.min(currentIndex + 1, cards.length) / (moreCardsLoading ? Math.max(cards.length, 25) : cards.length)) * 100}%`,
               background: `linear-gradient(90deg, hsl(${mood.accent}), hsl(${mood.primary}))`,
             }}
           />
