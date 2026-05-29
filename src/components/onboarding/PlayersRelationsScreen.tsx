@@ -92,7 +92,9 @@ const PlayersRelationsScreen = ({ step, lang, players, relations, onPlayersChang
     if (!addingPlayer) return;
     const name = addingPlayer.name.trim();
     if (!name || players.length >= 12) { setAddingPlayer(null); return; }
-    const id = crypto.randomUUID();
+    const id = typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
     onPlayersChange([...players, { id, name, emoji: addingPlayer.emoji }]);
     requestAnimationFrame(() => { const pos = positionsRef.current.get(id); if (pos) { pos.x=addingPlayer.x; pos.y=addingPlayer.y; pos.bounce=performance.now(); } });
     setAddingPlayer(null);

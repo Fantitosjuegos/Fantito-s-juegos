@@ -65,7 +65,7 @@ async function generateBatch(
       },
       batch,
       batchSize: size,
-      avoidQuestions,
+      avoidQuestions: avoidQuestions.slice(0, 80),
       // Live in-session feedback only matters for phase 2 generation
       liveFeedback: batch === 2 ? getLiveFeedback() : undefined,
     },
