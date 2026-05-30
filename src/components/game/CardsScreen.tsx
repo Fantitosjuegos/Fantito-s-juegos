@@ -414,4 +414,4 @@ const RecapRow = ({ label, children }: { label: string; children: React.ReactNod
   </div>
 );
 
-export default CardsScreen;
+export default memo(CardsScreen);

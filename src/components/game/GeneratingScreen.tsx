@@ -1,7 +1,6 @@
-
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, memo } from 'react';
+import { Sparkles } from 'lucide-react';
 import { cssVars } from '@/lib/css-utils';
-import { Sparkles, Zap } from 'lucide-react';
 import { Language, OnboardingState, RELATION_TYPES, VIBES } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
@@ -262,5 +261,4 @@ const GeneratingScreen = ({ lang, state }: GeneratingScreenProps) => {
   );
 };
 
-export default GeneratingScreen;
-
+export default memo(GeneratingScreen);
