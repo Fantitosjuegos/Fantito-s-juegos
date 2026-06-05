@@ -100,7 +100,10 @@ const RelationshipPicker = ({
                     }`}
                     style={{ animation: `pkr-tile-in .25s ease-out ${i * 25}ms backwards` }}
                   >
-                    <span className="text-3xl leading-none">{rt.emoji}</span>
+                    {rt.emoji.startsWith('/') || rt.emoji.startsWith('data:')
+  ? <img src={rt.emoji} alt={rt.id} width={32} height={32} style={{ objectFit: 'contain' }} />
+  : <span className="text-3xl leading-none">{rt.emoji}</span>
+}
                     <span className={`text-[10px] font-display font-bold ${rt.color}`}>{t(lang, rt.labelKey)}</span>
                   </button>
                 );

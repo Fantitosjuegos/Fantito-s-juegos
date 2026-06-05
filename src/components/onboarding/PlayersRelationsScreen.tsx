@@ -198,7 +198,10 @@ const PlayersRelationsScreen = ({ step, lang, players, relations, onPlayersChang
             const a=positionsRef.current.get(rel.player1Id), b=positionsRef.current.get(rel.player2Id);
             if (!a||!b) return null;
             const rt=RELATION_TYPES.find(r=>r.id===rel.type);
-            return (<button key={`mid-${i}`} data-relation-badge onClick={()=>setPickerPair({a:rel.player1Id,b:rel.player2Id})} className="absolute -translate-x-1/2 -translate-y-1/2 text-base bg-card/80 backdrop-blur border border-white/[0.1] rounded-full w-7 h-7 flex items-center justify-center active:scale-90" style={{left:(a.x+b.x)/2,top:(a.y+b.y)/2,animation:'pr-bubble-in .25s ease-out'}} aria-label="Edit relationship">{rt?.emoji}</button>);
+            return (<button key={`mid-${i}`} data-relation-badge onClick={()=>setPickerPair({a:rel.player1Id,b:rel.player2Id})} className="absolute -translate-x-1/2 -translate-y-1/2 text-base bg-card/80 backdrop-blur border border-white/[0.1] rounded-full w-7 h-7 flex items-center justify-center active:scale-90" style={{left:(a.x+b.x)/2,top:(a.y+b.y)/2,animation:'pr-bubble-in .25s ease-out'}} aria-label="Edit relationship">{rt?.emoji && (rt.emoji.startsWith('/') || rt.emoji.startsWith('data:'))
+  ? <img src={rt.emoji} alt={rt?.id} width={20} height={20} style={{ objectFit: 'contain' }} />
+  : rt?.emoji
+}</button>);
           })}
 
           {players.map((p)=>{
