@@ -1,3 +1,12 @@
+import loversEmoji from '@/assets/emojis/lovers.webp';
+import crushEmoji from '@/assets/emojis/crush.webp';
+import bestfriendsEmoji from '@/assets/emojis/bestfriends.webp';
+import flirtyEmoji from '@/assets/emojis/Flirty.webp';
+import complicatedEmoji from '@/assets/emojis/complicated.webp';
+import enemiesEmoji from '@/assets/emojis/enemies.webp';
+import roomatesEmoji from '@/assets/emojis/roommates.webp';
+import familyEmoji from '@/assets/emojis/family.webp';
+import coworkersEmoji from '@/assets/emojis/coworkers.webp';
 import type { TranslationKey } from './translations';
 
 export type Language = 'en' | 'es' | 'de' | 'fr' | 'pt' | 'it' | 'ar';
@@ -91,15 +100,15 @@ export const VIBES: { id: Vibe; labelKey: TranslationKey; emoji: string }[] = [
 ];
 
 export const RELATION_TYPES: { id: RelationType; labelKey: TranslationKey; emoji: string; color: string }[] = [
-  { id: 'lovers',      labelKey: 'lovers',        emoji: '❤️',                      color: 'text-pink-300' },
-  { id: 'crush',       labelKey: 'crush',         emoji: '😍',                      color: 'text-pink-300' },
-  { id: 'beef',        labelKey: 'beef',          emoji: '🥩',                      color: 'text-red-300' },
-  { id: 'bestfriends', labelKey: 'bestFriends',   emoji: '🤝',                      color: 'text-blue-300' },
-  { id: 'flirtyrel',   labelKey: 'flirtyRel',     emoji: '🔥',                      color: 'text-orange-300' },
-  { id: 'complicated', labelKey: 'complicatedRel', emoji: '👀',                     color: 'text-purple-300' },
-  { id: 'enemies',     labelKey: 'enemiesRel',    emoji: '💀',                      color: 'text-zinc-300' },
-  { id: 'roommates',   labelKey: 'roommates',     emoji: '🏠',                      color: 'text-teal-300' },
-  { id: 'family',      labelKey: 'familyRel',     emoji: '👨\u200d👩\u200d👧',      color: 'text-green-300' },
+  { id: 'lovers',      labelKey: 'lovers',        emoji: loversEmoji,      color: 'text-pink-300' },
+{ id: 'crush',       labelKey: 'crush',         emoji: crushEmoji,       color: 'text-pink-300' },
+{ id: 'best_friends',labelKey: 'bestFriends',   emoji: bestfriendsEmoji, color: 'text-yellow-300' },
+{ id: 'flirtyrel',   labelKey: 'flirtyRel',     emoji: flirtyEmoji,      color: 'text-orange-300' },
+{ id: 'complicated', labelKey: 'complicatedRel',emoji: complicatedEmoji, color: 'text-purple-300' },
+{ id: 'enemies',     labelKey: 'enemiesRel',    emoji: enemiesEmoji,     color: 'text-zinc-300' },
+{ id: 'roommates',   labelKey: 'roommates',     emoji: roomatesEmoji,    color: 'text-teal-300' },
+{ id: 'family',      labelKey: 'familyRel',     emoji: familyEmoji,      color: 'text-green-300' },
+{ id: 'coworkers',   labelKey: 'coworkers',     emoji: coworkersEmoji,   color: 'text-blue-300' },
 ];
 
 export const FAMILY_ROLES: { id: FamilyRole; labelKey: TranslationKey; emoji: string }[] = [
