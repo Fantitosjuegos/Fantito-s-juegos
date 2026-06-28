@@ -84,6 +84,8 @@ function buildConsumptionRules(state: OnboardingState): string {
 
 function buildGameModeRules(state: OnboardingState): string {
   switch (state.gameMode) {
+    case 'soft':
+      return `[MODE: SOFT 🧸] Clean, safe, all-ages friendly. ZERO sexual/crude content, ZERO risky dares, ZERO substance pressure. Light banter, wholesome challenges, funny would-you-rathers, soft confessions only.`;
     case 'nasty18':
       return `[MODE: NASTY +18 🔞] Explicit/sexual/bold content ALLOWED. 15+ adult-themed cards. Playful, consensual, never degrading.`;
     case 'family':
@@ -137,7 +139,7 @@ export function buildDynamicPrompt(state: OnboardingState): string {
   if (vibeIds.includes('chill')) topicsInclude.push('lighthearted');
   if (vibeIds.includes('wild')) topicsInclude.push('chaos');
   if (vibeIds.includes('chaotic')) topicsInclude.push('unpredictable');
-  if (state.gameMode === 'family') {
+  if (state.gameMode === 'family' || state.gameMode === 'soft') {
     topicsAvoid.push('flirty', 'sexual', 'substance', 'crude', 'adult');
     topicsInclude.push('wholesome', 'family-friendly');
   }

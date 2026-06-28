@@ -22,12 +22,15 @@ const freeRelationsLimit = (n: number) => Math.max(1, Math.floor(n / 2));
 interface Props {
   step: number; lang: Language;
   players: Player[]; relations: Relation[];
+  gameMode?: GameMode;
+  onGameModeChange?: (mode: GameMode) => void;
   onPlayersChange: (p: Player[]) => void;
   onRelationsChange: (r: Relation[]) => void;
   onNext: () => void; onBack: () => void;
+  embedded?: boolean;
 }
 
-const PlayersRelationsScreen = ({ step, lang, players, relations, onPlayersChange, onRelationsChange, onNext, onBack }: Props) => {
+const PlayersRelationsScreen = ({ step, lang, players, relations, gameMode, onGameModeChange, onPlayersChange, onRelationsChange, onNext, onBack, embedded = false }: Props) => {
   const [paywallOpen,  setPaywallOpen]  = useState(false);
   const [selectedId,   setSelectedId]   = useState<string | null>(null);
   const [pickerPair,   setPickerPair]   = useState<{ a: string; b: string } | null>(null);

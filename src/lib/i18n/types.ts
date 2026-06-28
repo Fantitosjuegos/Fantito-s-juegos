@@ -55,6 +55,10 @@ export type TranslationKeys = {
   familyMother?: string;
   familyFather?: string;
   familyTwins?: string;
+  familyDaughter?: string;
+  familySon?: string;
+  familyGrandmother?: string;
+  familyGrandfather?: string;
   pickRelationship?: string;
   pickFamilyRole?: string;
   removeLink?: string;
@@ -67,6 +71,8 @@ export type TranslationKeys = {
   setTheVibe: string;
   gameMode: string;
   // ── Game Modes ──────────────────────────────────────────────────────────────
+  softMode: string;
+  softModeDesc: string;
   normalMode: string;
   normalModeDesc: string;
   nasty18Mode: string;
@@ -133,3 +139,5 @@ export type TranslationKeys = {
   // ── Common ──────────────────────────────────────────────────────────────────
   continue_: string;
 };
+// Game type label keys
+export type {};

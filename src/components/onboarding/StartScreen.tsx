@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Language, LANGUAGES } from '@/lib/onboarding-types';
 import { useAuth } from '@/hooks/useAuth';
 import { useEntitlements } from '@/hooks/useEntitlements';
-import startBg from '@/assets/start-bg.webp';
-
+import startBg from '@/assets/fantito-cowboy.png';
+import fantitoLogo from '@/assets/fantito-logo.svg';
 
 interface StartScreenProps {
   lang: Language;
@@ -23,6 +23,9 @@ const START_I18N: Record<string, {
   luck: string;
   intro: string;
   loginLabel: string;
+  tagline: string;
+  ctaPrimary: string;
+  ctaLuck: string;
 }> = {
   en: {
     headline1: 'Pass the phone.',
@@ -38,6 +41,9 @@ const START_I18N: Record<string, {
     luck: 'Feeling lucky? Try Luck Mode',
     intro: 'Fantito is reading the room…',
     loginLabel: 'Login',
+    tagline: '2–10 players · personalised party card games',
+    ctaPrimary: 'Yalla !',
+    ctaLuck: 'Lucky ?',
   },
   es: {
     headline1: 'Pasa el móvil.',
@@ -53,10 +59,13 @@ const START_I18N: Record<string, {
     luck: '¿Con suerte? Prueba el Modo Suerte',
     intro: 'Fantito está leyendo el ambiente…',
     loginLabel: 'Entrar',
+    tagline: '2–10 jugadores · juegos de cartas personalizados',
+    ctaPrimary: '¡Vamos!',
+    ctaLuck: '¿Suerte?',
   },
   fr: {
     headline1: 'Passe le téléphone.',
-    headline2: 'Fantito lit l’ambiance.',
+    headline2: 'Fantito lit l\'ambiance.',
     subtitle: 'Questions, votes, défis et mini-jeux faits pour ton groupe exact.',
     teasers: [
       'Qui va texter son ex ce soir ?',
@@ -66,8 +75,11 @@ const START_I18N: Record<string, {
     cta: 'Commencer en 10 secondes',
     reassurance: '2–10 joueurs • jeux de cartes personnalisés',
     luck: 'Tu te sens chanceux ? Mode Chance',
-    intro: 'Fantito lit l’ambiance…',
+    intro: 'Fantito lit l\'ambiance…',
     loginLabel: 'Connexion',
+    tagline: '2–10 joueurs · jeux de cartes personnalisés',
+    ctaPrimary: 'Yalla !',
+    ctaLuck: 'Chance ?',
   },
   de: {
     headline1: 'Reich das Handy weiter.',
@@ -83,6 +95,9 @@ const START_I18N: Record<string, {
     luck: 'Glück gefragt? Glücksmodus',
     intro: 'Fantito liest die Runde…',
     loginLabel: 'Anmelden',
+    tagline: '2–10 Spieler · personalisierte Partyspiel-Karten',
+    ctaPrimary: 'Los geht\'s!',
+    ctaLuck: 'Glück ?',
   },
   pt: {
     headline1: 'Passa o telemóvel.',
@@ -98,13 +113,16 @@ const START_I18N: Record<string, {
     luck: 'Com sorte? Modo Sorte',
     intro: 'O Fantito está a ler a sala…',
     loginLabel: 'Entrar',
+    tagline: '2–10 jogadores · jogos de cartas personalizados',
+    ctaPrimary: 'Vamos!',
+    ctaLuck: 'Sorte ?',
   },
   it: {
     headline1: 'Passa il telefono.',
     headline2: 'Fantito legge la stanza.',
     subtitle: 'Domande, voti, sfide e mini-giochi fatti per il tuo gruppo.',
     teasers: [
-      'Chi scriverà all’ex stasera?',
+      'Chi scriverà all\'ex stasera?',
       'Chi qui nasconde una cotta?',
       'Quali due persone non dovrebbero mai stare insieme?',
     ],
@@ -113,6 +131,9 @@ const START_I18N: Record<string, {
     luck: 'Ti senti fortunato? Modalità Fortuna',
     intro: 'Fantito sta leggendo la stanza…',
     loginLabel: 'Accedi',
+    tagline: '2–10 giocatori · giochi di carte personalizzati',
+    ctaPrimary: 'Yalla !',
+    ctaLuck: 'Fortuna ?',
   },
   ar: {
     headline1: 'مرّر الهاتف.',
@@ -128,6 +149,9 @@ const START_I18N: Record<string, {
     luck: 'تشعر بالحظ؟ جرّب وضع الحظ',
     intro: 'Fantito يقرأ المجموعة…',
     loginLabel: 'تسجيل الدخول',
+    tagline: '2–10 لاعبين · ألعاب أوراق مخصّصة للحفلات',
+    ctaPrimary: 'يلا !',
+    ctaLuck: 'حظ ؟',
   },
 };
 
@@ -141,9 +165,7 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
   const { cardsRemaining } = useEntitlements();
   const introTimer = useRef<number | null>(null);
 
-
   useEffect(() => {
-    // Short opening animation: ~1.4s
     introTimer.current = window.setTimeout(() => setIntro(false), 1400);
     return () => {
       if (introTimer.current) window.clearTimeout(introTimer.current);
@@ -162,7 +184,6 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
     <div className="min-h-[100dvh] max-w-[430px] mx-auto bg-background relative overflow-hidden flex flex-col px-5 pt-4 pb-6">
       <style>{`
         @keyframes ss-fade-up { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes ss-whisper { 0% { opacity: 0; transform: translateY(8px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes ss-cta-pulse {
           0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35), 0 8px 24px -10px hsl(var(--primary) / 0.5); }
           50% { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); 0 10px 28px -8px hsl(var(--primary) / 0.6); }
@@ -171,16 +192,7 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
           0%, 100% { opacity: 0.35; filter: blur(0.5px); }
           50% { opacity: 0.65; filter: blur(0px); }
         }
-        @keyframes ss-particle {
-          0% { opacity: 0; transform: translate(0,0) scale(0.4); }
-          25% { opacity: 0.7; }
-          100% { opacity: 0; transform: translate(var(--px,0), var(--py,-60px)) scale(1); }
-        }
         @keyframes ss-intro-fade { 0% { opacity: 1 } 80% { opacity: 1 } 100% { opacity: 0 } }
-        @keyframes ss-dice-roll {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(180deg); }
-        }
         @keyframes ss-destiny-float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-3px); }
@@ -196,17 +208,17 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
         }
       `}</style>
 
-      {/* Background photo of Fantito */}
+      {/* Background — darkened and blurred per Fanta's design */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <img
           src={startBg}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.22]"
-          style={{ filter: 'saturate(0.85) contrast(1.02)' }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(3px) brightness(0.62) saturate(1.05)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,hsl(var(--primary)/0.10),transparent_70%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/35 to-background/90" />
+        <div className="absolute inset-0 bg-black/25" />
       </div>
 
       {/* Intro overlay */}
@@ -229,7 +241,7 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
         </div>
       )}
 
-      {/* Top bar — discreet */}
+      {/* Top bar */}
       <div className="relative z-20 flex items-center justify-between opacity-90">
         <button
           onClick={() => setLangOpen(true)}
@@ -248,19 +260,13 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
             {cardsRemaining}
           </span>
           {user ? (
-            <button
-              onClick={() => signOut()}
-              aria-label="Sign out"
-              className="text-muted-foreground hover:text-foreground rounded-full p-1.5 active:scale-95 transition-all"
-            >
+            <button onClick={() => signOut()} aria-label="Sign out"
+              className="text-muted-foreground hover:text-foreground rounded-full p-1.5 active:scale-95 transition-all">
               <LogOut className="w-4 h-4" />
             </button>
           ) : (
-            <button
-              onClick={() => navigate('/auth')}
-              aria-label="Sign in"
-              className="text-muted-foreground hover:text-foreground rounded-full p-1.5 active:scale-95 transition-all flex items-center gap-1"
-            >
+            <button onClick={() => navigate('/auth')} aria-label="Sign in"
+              className="text-muted-foreground hover:text-foreground rounded-full p-1.5 active:scale-95 transition-all flex items-center gap-1">
               <LogIn className="w-3.5 h-3.5" />
               <span className="text-xs">{t.loginLabel}</span>
             </button>
@@ -268,22 +274,35 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
         </div>
       </div>
 
-      {/* Main content — two big choices, anchored lower */}
-      <div className="relative z-10 flex-1 flex flex-col justify-end items-stretch gap-4 max-w-[360px] w-full mx-auto pb-12">
+      {/* Centered hero logo */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
+        <img
+          src={fantitoLogo}
+          alt="Fantito"
+          decoding="async"
+          className="w-[110%] max-w-[600px] h-auto mt-20 drop-shadow-[0_8px_18px_rgba(0,0,0,0.5)]"
+          style={{ animation: 'ss-fade-up 0.7s ease-out both' }}
+        />
+      </div>
+
+      {/* Buttons — anchored at bottom */}
+      <div className="relative z-10 flex flex-col items-stretch gap-4 max-w-[360px] w-full mx-auto pb-12">
         <div
-          className="flex items-center justify-center gap-2 text-[11px] font-display font-semibold tracking-wide text-muted-foreground mb-1"
-          style={{ animation: 'ss-fade-up 0.6s ease-out both' }}
+          className="flex justify-center mb-1"
+          style={{ animation: 'ss-fade-up 0.6s ease-out 0.1s both' }}
         >
-          <span className="rounded-full bg-card/70 border border-white/10 px-2.5 py-1">2–10 players</span>
-          <span className="rounded-full bg-card/70 border border-white/10 px-2.5 py-1">personalised party card games</span>
+          <span className="text-[11px] font-display font-semibold tracking-wide text-foreground/85">
+            {t.tagline}
+          </span>
         </div>
+
         <button
           onClick={handleStart}
           disabled={starting}
           className="relative w-full bg-primary text-primary-foreground rounded-full py-10 font-display font-bold text-3xl active:scale-[0.98] transition-transform disabled:opacity-80"
           style={{ animation: 'ss-cta-pulse 2.6s ease-in-out infinite, ss-fade-up 0.6s ease-out 0.1s both' }}
         >
-          Yalla !
+          {t.ctaPrimary}
         </button>
 
         {onLuck && (
@@ -292,26 +311,23 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
             className="relative w-[85%] mx-auto bg-card border-2 border-primary/30 text-foreground rounded-full py-7 font-display font-bold text-2xl active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-3 group overflow-hidden"
             style={{ animation: 'ss-fade-up 0.6s ease-out 0.25s both, ss-destiny-float 3.2s ease-in-out infinite 1s' }}
           >
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -translate-x-full"
+            <span aria-hidden="true" className="pointer-events-none absolute inset-0 -translate-x-full"
               style={{
                 background: 'linear-gradient(110deg, transparent 30%, hsl(var(--primary) / 0.18) 50%, transparent 70%)',
                 animation: 'ss-destiny-shimmer 3.8s ease-in-out infinite 1.4s',
               }}
             />
             <Dice5 className="w-6 h-6 text-primary" style={{ animation: 'ss-dice-wobble 3.2s ease-in-out infinite 1s' }} />
-            Destiny
+            {t.ctaLuck}
           </button>
         )}
       </div>
-
 
       {/* Language sheet */}
       {langOpen && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end" onClick={() => setLangOpen(false)}>
           <div
-            className="w-full max-w-[430px] mx-auto bg-card border-t border-white/10 rounded-t-3xl p-5 pb-8 animate-slide-in-right"
+            className="w-full max-w-[430px] mx-auto bg-card border-t border-white/10 rounded-t-3xl p-5 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -320,8 +336,7 @@ const StartScreen = ({ lang, onStart, onLuck, onLanguageChange }: StartScreenPro
             </div>
             <div className="grid grid-cols-2 gap-2">
               {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
+                <button key={l.code}
                   onClick={() => { onLanguageChange?.(l.code as Language); setLangOpen(false); }}
                   className={`rounded-xl border px-3 py-2.5 text-left flex items-center gap-2 transition-all ${l.code === lang ? 'border-primary bg-primary/10' : 'border-white/10 bg-card/60 hover:border-white/20'}`}
                 >

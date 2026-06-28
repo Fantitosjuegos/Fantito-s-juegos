@@ -9,7 +9,6 @@ import StartScreen from './StartScreen';
 import { useAuth } from '@/hooks/useAuth';
 import PaywallModal from '../PaywallModal';
 
-import PlayersRelationsScreen from './PlayersRelationsScreen';
 import VibeSettingsScreen from './VibeSettingsScreen';
 import SummaryScreen from './SummaryScreen';
 import GeneratingScreen from '../game/GeneratingScreen';
@@ -46,14 +45,12 @@ const OnboardingFlow = () => {
   const cardsRef = useRef<GameCard[]>([]);
   const promptRef = useRef<ComposedPrompt | null>(null);
   const restLoadedRef = useRef(false);
-  // Tracks whether the tutorial was already shown for the current generation,
-  // so a late-arriving batch 2 can't re-show it after the user dismissed it.
   const tutorialShownRef = useRef(false);
 
-  // Persist player names so Luck tools can auto-fill them.
+  // Persist player names for Luck tools
   useEffect(() => {
     if (state.players.length > 0) {
-      void saveLuckPlayers(state.players.map(p => p.name));
+      saveLuckPlayers(state.players.map(p => p.name));
     }
   }, [state.players]);
 
@@ -76,7 +73,9 @@ const OnboardingFlow = () => {
   const handleStartGame = async () => {
     const isAnon = !user;
     if (isAnon) {
-      const played = Number(await storage.get('anonGamesPlayed') ?? '0');
+      // Use storage abstraction — not localStorage directly
+      const stored = await storage.get('fantito:anonGamesPlayed');
+      const played = Number(stored ?? '0');
       if (played >= 1) {
         setShowAnonPaywall(true);
         return;
@@ -96,8 +95,9 @@ const OnboardingFlow = () => {
       tutorialShownRef.current = true;
       setMoreCardsLoading(!!result.hasMoreLoading);
       if (isAnon) {
-        const played = Number(await storage.get('anonGamesPlayed') ?? '0');
-        await storage.set('anonGamesPlayed', String(played + 1));
+        const stored = await storage.get('fantito:anonGamesPlayed');
+        const played = Number(stored ?? '0');
+        await storage.set('fantito:anonGamesPlayed', String(played + 1));
       }
     } catch {
       setGenerationStatus('error');
@@ -105,7 +105,6 @@ const OnboardingFlow = () => {
     }
   };
 
-  // Triggered by CardsScreen the first time the player reaches card 6.
   const handleLoadMoreCards = useCallback(async () => {
     if (restLoadedRef.current) return;
     if (!promptRef.current) return;
@@ -116,7 +115,7 @@ const OnboardingFlow = () => {
       cardsRef.current = all;
       setGeneratedCards(all);
     } catch {
-      // Keep the existing batch 1 cards; user can still finish the round.
+      // Keep batch 1 cards — user can still finish the round
     } finally {
       setMoreCardsLoading(false);
     }
@@ -133,7 +132,6 @@ const OnboardingFlow = () => {
   const handleRelaunch = async () => {
     setGenerationStatus('generating');
     setMoreCardsLoading(true);
-    // Skip tutorial on relaunch — user already knows how to play.
     tutorialShownRef.current = true;
     restLoadedRef.current = false;
     try {
@@ -153,12 +151,12 @@ const OnboardingFlow = () => {
   const lang = state.language;
 
   const renderView = () => {
-    if (luckMode) {
-      return <LuckMode onExit={() => setLuckMode(false)} />;
-    }
+    if (luckMode) return <LuckMode onExit={() => setLuckMode(false)} />;
+
     if (generationStatus === 'generating') {
       return <GeneratingScreen lang={lang} state={state} />;
     }
+
     if (generationStatus === 'ready' && generatedCards.length > 0) {
       if (showTutorial) {
         return <SwipeTutorialScreen lang={lang} onGotIt={() => setShowTutorial(false)} />;
@@ -180,6 +178,8 @@ const OnboardingFlow = () => {
         />
       );
     }
+
+    // 3-step flow: 0 = Start, 1 = Vibes+Players, 2 = Summary
     switch (state.step) {
       case 0:
         return (
@@ -192,23 +192,11 @@ const OnboardingFlow = () => {
         );
       case 1:
         return (
-          <PlayersRelationsScreen
-            step={state.step}
-            lang={lang}
-            players={state.players}
-            relations={state.relations}
-            onPlayersChange={(p: Player[]) => updateState('players', p)}
-            onRelationsChange={(r: Relation[]) => updateState('relations', r)}
-            onNext={next}
-            onBack={back}
-          />
-        );
-      case 2:
-        return (
           <VibeSettingsScreen
             step={state.step}
             lang={lang}
             players={state.players}
+            relations={state.relations}
             selectedVibes={state.vibes}
             selectedConsumptions={state.selectedConsumptions}
             consumptionLevel={state.consumptionLevel}
@@ -219,6 +207,8 @@ const OnboardingFlow = () => {
             detailsValue={state.freeTextDetails}
             selectedGameTypes={state.selectedGameTypes}
             timing={state.timing}
+            onPlayersChange={(p: Player[]) => updateState('players', p)}
+            onRelationsChange={(r: Relation[]) => updateState('relations', r)}
             onToggleVibe={toggleVibe}
             onToggleConsumption={(c: ConsumptionType) => {
               const cur = state.selectedConsumptions;
@@ -244,7 +234,7 @@ const OnboardingFlow = () => {
             onBack={back}
           />
         );
-      case 3:
+      case 2:
         return (
           <SummaryScreen
             step={state.step}
@@ -252,7 +242,7 @@ const OnboardingFlow = () => {
             state={state}
             onBack={back}
             onStart={handleStartGame}
-            onJumpToStep={(s: number) => updateState('step', s)}
+            onJumpToStep={(s: number) => setStep(s)}
           />
         );
       default:
