@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState, memo } from 'react';
-import { Language, ConsumptionType, GameMode } from '@/lib/onboarding-types';
+import { Language, ConsumptionType, GameMode, PLAYER_AVATAR_MAP } from '@/lib/onboarding-types';
 import { isRTL } from '@/lib/translations';
 import { GameCard } from '@/lib/game-types';
 import { Mood } from '@/lib/card-mood';
 import { Flame, Repeat, RotateCcw, Sparkles, Eye, Skull, Lock, Brain, Users } from 'lucide-react';
-import mascot from '@/assets/mascot.webp';
+import fantitoLoader from '@/assets/fantito-loader.svg';
 import AtmosphereLayer from './AtmosphereLayer';
 import { buildSessionReport } from '@/lib/session-report';
+import type { PlayerLite } from './CardsScreen';
 
 export interface SessionStats {
   total: number;
   done: number;
   skipped: number;
   starred: number;
-  /** danger types skipped (intimate / chaos / nasty) */
   dangerSkipped: number;
   byType: Record<string, number>;
   remainingInQueue: number;
@@ -23,7 +23,7 @@ interface Props {
   lang: Language;
   cards: GameCard[];
   stats: SessionStats;
-  players: string[];
+  players: PlayerLite[];
   vibes: string[];
   consumptions: ConsumptionType[];
   mode?: GameMode;
@@ -38,7 +38,7 @@ const LABELS: Record<Language, {
   runItBack: string; runSub: string; newGame: string;
   fomoCards: string; fomoSkipped: string; fomoStars: string;
 }> = {
-  en: { chaosScore: 'Chaos score', callouts: 'Group callouts', roles: 'Tonight’s roles', learned: 'What Fantito learned', unlocked: 'Just unlocked', runItBack: 'Run it back', runSub: 'Fantito will adapt to what just happened', newGame: 'New game', fomoCards: 'cards still hidden', fomoSkipped: 'questions ducked', fomoStars: 'cards starred' },
+  en: { chaosScore: 'Chaos score', callouts: 'Group callouts', roles: "Tonight's roles", learned: 'What Fantito learned', unlocked: 'Just unlocked', runItBack: 'Run it back', runSub: 'Fantito will adapt to what just happened', newGame: 'New game', fomoCards: 'cards still hidden', fomoSkipped: 'questions ducked', fomoStars: 'cards starred' },
   es: { chaosScore: 'Caos', callouts: 'Apuntes del grupo', roles: 'Roles de la noche', learned: 'Lo que Fantito aprendió', unlocked: 'Desbloqueado', runItBack: 'Otra ronda', runSub: 'Fantito se adaptará a lo que pasó', newGame: 'Nueva partida', fomoCards: 'cartas escondidas', fomoSkipped: 'preguntas esquivadas', fomoStars: 'cartas marcadas' },
   fr: { chaosScore: 'Chaos', callouts: 'Constats du groupe', roles: 'Rôles de la soirée', learned: 'Ce que Fantito a vu', unlocked: 'Déverrouillé', runItBack: 'On remet ça', runSub: "Fantito s'adaptera à ce qu'il a vu", newGame: 'Nouvelle partie', fomoCards: 'cartes cachées', fomoSkipped: 'questions esquivées', fomoStars: 'cartes favorites' },
   de: { chaosScore: 'Chaos', callouts: 'Notizen', roles: 'Rollen heute Abend', learned: 'Was Fantito gelernt hat', unlocked: 'Freigeschaltet', runItBack: 'Nochmal', runSub: 'Fantito passt sich an', newGame: 'Neues Spiel', fomoCards: 'Karten versteckt', fomoSkipped: 'Fragen ausgewichen', fomoStars: 'markiert' },
@@ -53,13 +53,13 @@ const SessionRecapScreen = ({
 }: Props) => {
   const rtl = isRTL(lang);
   const labels = LABELS[lang] || LABELS.en;
+  const playerNames = useMemo(() => players.map(p => p.name), [players]);
 
   const report = useMemo(
-    () => buildSessionReport({ stats, cards, players, vibes, consumptions, mode }),
-    [stats, cards, players, vibes, consumptions, mode],
+    () => buildSessionReport({ stats, cards, players: playerNames, vibes, consumptions, mode }),
+    [stats, cards, playerNames, vibes, consumptions, mode],
   );
 
-  // Reveal sequence
   const [phase, setPhase] = useState(0);
   useEffect(() => {
     const timers = [120, 700, 1300, 1900, 2500, 3100, 3700].map((d, i) =>
@@ -68,7 +68,6 @@ const SessionRecapScreen = ({
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  // Animated meter
   const [meter, setMeter] = useState(0);
   useEffect(() => {
     if (phase < 2) return;
@@ -108,19 +107,15 @@ const SessionRecapScreen = ({
       />
 
       <div className="relative z-10 flex flex-col flex-1 px-5 pt-6 pb-5 gap-4 overflow-y-auto">
-        {/* Header — dynamic title */}
+
+        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div
-              className="absolute inset-0 rounded-2xl blur-xl vs-pulse-glow"
-              style={{ background: `hsl(${mood.primary} / 0.55)` }}
-            />
-            <img
-              src={mascot}
-              alt="Fantito"
-              className="relative w-14 h-14 rounded-2xl object-cover border border-white/20 vs-float"
-              loading="lazy"
-            />
+            <div className="absolute inset-0 rounded-2xl blur-xl vs-pulse-glow"
+              style={{ background: `hsl(${mood.primary} / 0.55)` }} />
+            <img src={fantitoLoader} alt="Fantito"
+              className="relative w-14 h-14 rounded-2xl object-contain border border-white/20 vs-float"
+              loading="lazy" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-display font-bold tracking-[0.18em] uppercase text-muted-foreground">
@@ -133,7 +128,26 @@ const SessionRecapScreen = ({
           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
         </div>
 
-        {/* Chaos meter + tags */}
+        {/* Player avatar row */}
+        {players.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {players.map((p) => {
+              const avatar = PLAYER_AVATAR_MAP[p.emoji];
+              return (
+                <div key={p.name} className="flex flex-col items-center gap-1">
+                  <div className="w-10 h-10 rounded-full bg-card border border-primary/20 overflow-hidden flex items-center justify-center">
+                    {avatar
+                      ? <img src={avatar} alt="" className="w-full h-full object-contain" draggable={false} />
+                      : <span className="text-lg">{p.emoji}</span>}
+                  </div>
+                  <span className="text-[9px] font-display font-bold text-foreground/70 max-w-[44px] truncate text-center">{p.name}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Chaos meter */}
         {phase >= 1 && (
           <div className="vs-rise rounded-2xl border border-white/10 bg-card/60 backdrop-blur-md p-4">
             <div className="flex items-center justify-between mb-2">
@@ -141,32 +155,24 @@ const SessionRecapScreen = ({
                 <Flame className="w-3.5 h-3.5" style={{ color: `hsl(${mood.primary})` }} />
                 {labels.chaosScore} · {report.chaosLabel}
               </span>
-              <span
-                className="font-display text-2xl font-black tabular-nums"
-                style={{ color: `hsl(${mood.primary})`, textShadow: `0 0 18px hsl(${mood.primary} / 0.7)` }}
-              >
+              <span className="font-display text-2xl font-black tabular-nums"
+                style={{ color: `hsl(${mood.primary})`, textShadow: `0 0 18px hsl(${mood.primary} / 0.7)` }}>
                 {Math.round(meter)}%
               </span>
             </div>
             <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-100"
+              <div className="h-full rounded-full transition-all duration-100"
                 style={{
                   width: `${meter}%`,
                   background: `linear-gradient(90deg, hsl(${mood.accent}), hsl(${mood.primary}))`,
                   boxShadow: `0 0 14px hsl(${mood.primary} / 0.7)`,
-                }}
-              />
+                }} />
             </div>
             <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-              {report.tags.map((t, i) => (
-                <Badge
-                  key={t.label}
+              {report.tags.map((tag, i) => (
+                <Badge key={tag.label}
                   icon={i === 0 ? <Skull className="w-3 h-3" /> : i === 1 ? <Eye className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
-                  label={t.label}
-                  value={t.value}
-                  mood={mood}
-                />
+                  label={tag.label} value={tag.value} mood={mood} />
               ))}
             </div>
           </div>
@@ -180,11 +186,8 @@ const SessionRecapScreen = ({
             </p>
             <div className="space-y-1.5">
               {report.groupCallouts.map((line, i) => (
-                <div
-                  key={i}
-                  className="vs-rise rounded-xl border border-white/10 bg-card/50 backdrop-blur-sm px-3.5 py-2.5 text-sm font-display text-foreground"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
+                <div key={i} className="vs-rise rounded-xl border border-white/10 bg-card/50 backdrop-blur-sm px-3.5 py-2.5 text-sm font-display text-foreground"
+                  style={{ animationDelay: `${i * 80}ms` }}>
                   {line}
                 </div>
               ))}
@@ -192,43 +195,45 @@ const SessionRecapScreen = ({
           </div>
         )}
 
-        {/* Player roles */}
+        {/* Player roles — with SVG avatar */}
         {phase >= 3 && report.playerRoles.length > 0 && (
           <div className="vs-rise space-y-2">
             <p className="text-[11px] font-display font-bold tracking-[0.16em] uppercase text-muted-foreground px-1">
               {labels.roles}
             </p>
             <div className="space-y-1.5">
-              {report.playerRoles.map((r, i) => (
-                <div
-                  key={i}
-                  className="vs-rise rounded-xl border border-white/10 bg-card/40 backdrop-blur-sm px-3.5 py-2.5 flex items-center justify-between gap-3"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <div className="min-w-0">
-                    <p className="font-display font-bold text-sm text-foreground truncate">
-                      {r.player} <span className="text-primary">· {r.role}</span>
-                    </p>
-                    <p className="text-[10.5px] text-muted-foreground truncate">{r.reason}</p>
+              {report.playerRoles.map((r, i) => {
+                const playerData = players.find(p => p.name === r.player);
+                const avatar = playerData ? PLAYER_AVATAR_MAP[playerData.emoji] : null;
+                return (
+                  <div key={i} className="vs-rise rounded-xl border border-white/10 bg-card/40 backdrop-blur-sm px-3.5 py-2.5 flex items-center gap-3"
+                    style={{ animationDelay: `${i * 100}ms` }}>
+                    {avatar
+                      ? <img src={avatar} alt="" className="w-8 h-8 rounded-full object-contain shrink-0 border border-primary/20" draggable={false} />
+                      : <span className="text-xl shrink-0">{playerData?.emoji ?? '🎭'}</span>}
+                    <div className="min-w-0">
+                      <p className="font-display font-bold text-sm text-foreground truncate">
+                        {r.player} <span className="text-primary">· {r.role}</span>
+                      </p>
+                      <p className="text-[10.5px] text-muted-foreground truncate">{r.reason}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* What Fantito learned */}
         {phase >= 4 && (
-          <div
-            className="vs-rise rounded-2xl border border-primary/25 p-3.5"
-            style={{ background: `linear-gradient(135deg, hsl(${mood.primary} / 0.12), hsl(${mood.accent} / 0.08))` }}
-          >
+          <div className="vs-rise rounded-2xl border border-primary/25 p-3.5"
+            style={{ background: `linear-gradient(135deg, hsl(${mood.primary} / 0.12), hsl(${mood.accent} / 0.08))` }}>
             <p className="text-[11px] font-display font-bold tracking-[0.16em] uppercase text-muted-foreground mb-1.5 flex items-center gap-1.5">
               <Brain className="w-3 h-3" style={{ color: `hsl(${mood.primary})` }} />
               {labels.learned}
             </p>
             <p className="font-display text-sm text-foreground/95 leading-snug italic">
-              “{report.fantitoLearned}”
+              "{report.fantitoLearned}"
             </p>
           </div>
         )}
@@ -245,17 +250,14 @@ const SessionRecapScreen = ({
         {/* Unlocks */}
         {phase >= 5 && (
           <div className="vs-rise rounded-2xl border border-white/10 p-4"
-               style={{ background: `linear-gradient(135deg, hsl(${mood.primary} / 0.12), hsl(${mood.accent} / 0.08))` }}>
+            style={{ background: `linear-gradient(135deg, hsl(${mood.primary} / 0.12), hsl(${mood.accent} / 0.08))` }}>
             <p className="text-[11px] font-display font-bold tracking-[0.16em] uppercase text-muted-foreground flex items-center gap-1.5 mb-2">
               <Lock className="w-3 h-3" /> {labels.unlocked}
             </p>
             <div className="space-y-1.5">
               {report.nextRoundAdjustments.map((u, i) => (
-                <div
-                  key={u}
-                  className="vs-rise text-sm font-display font-semibold text-foreground flex items-center gap-2"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
+                <div key={u} className="vs-rise text-sm font-display font-semibold text-foreground flex items-center gap-2"
+                  style={{ animationDelay: `${i * 100}ms` }}>
                   <span style={{ color: `hsl(${mood.primary})` }}>⚠</span> {u}
                 </div>
               ))}
@@ -266,9 +268,9 @@ const SessionRecapScreen = ({
         {/* Quote */}
         {phase >= 6 && (
           <div className="vs-rise rounded-2xl border border-white/15 bg-card/70 backdrop-blur-md p-4 flex items-start gap-3">
-            <img src={mascot} alt="" className="w-9 h-9 rounded-xl object-cover border border-white/15 flex-shrink-0" />
+            <img src={fantitoLoader} alt="" className="w-9 h-9 rounded-xl object-contain border border-white/15 flex-shrink-0" />
             <p className="font-display text-sm italic text-foreground leading-snug">
-              “{report.fantitoQuote}”
+              "{report.fantitoQuote}"
             </p>
           </div>
         )}
@@ -277,33 +279,26 @@ const SessionRecapScreen = ({
 
         {/* CTAs */}
         <div className="space-y-2 sticky bottom-0 -mx-5 px-5 pt-2 pb-1 bg-gradient-to-t from-background via-background/95 to-transparent">
-          <button
-            onClick={onRelaunch}
-            disabled={relaunchLoading}
+          <button onClick={onRelaunch} disabled={relaunchLoading}
             className={`relative w-full text-primary-foreground font-display font-black text-base py-4 rounded-2xl active:scale-[0.98] transition-all overflow-hidden ${ctaReady ? 'vs-pulse-glow' : ''}`}
             style={{
               background: `linear-gradient(120deg, hsl(${mood.primary}), hsl(${mood.accent}))`,
               boxShadow: `0 0 28px -4px hsl(${mood.primary} / 0.85)`,
               opacity: relaunchLoading ? 0.7 : 1,
-            }}
-          >
+            }}>
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Repeat className="w-4 h-4" />
               {relaunchLoading ? '…' : `🔥 ${labels.runItBack}`}
             </span>
-            <span
-              className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 opacity-60"
+            <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 opacity-60"
               style={{
                 background: 'linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent)',
                 animation: 'vs-shine 2.4s ease-in-out infinite',
-              }}
-            />
+              }} />
           </button>
           <p className="text-center text-[11px] text-muted-foreground -mt-1">{labels.runSub}</p>
-          <button
-            onClick={onRestart}
-            className="w-full flex items-center justify-center gap-2 bg-card/60 backdrop-blur-sm text-foreground font-display font-semibold text-xs py-2.5 rounded-xl border border-white/10 active:scale-[0.98] transition-all"
-          >
+          <button onClick={onRestart}
+            className="w-full flex items-center justify-center gap-2 bg-card/60 backdrop-blur-sm text-foreground font-display font-semibold text-xs py-2.5 rounded-xl border border-white/10 active:scale-[0.98] transition-all">
             <RotateCcw className="w-3.5 h-3.5" />
             {labels.newGame}
           </button>
@@ -319,10 +314,7 @@ function Badge({ icon, label, value, mood }: { icon: React.ReactNode; label: str
       <div className="flex items-center justify-center gap-1 text-[9px] font-display font-bold tracking-wider uppercase text-muted-foreground">
         {icon}{label}
       </div>
-      <div
-        className="text-[11px] font-display font-black mt-0.5"
-        style={{ color: `hsl(${mood.primary})` }}
-      >
+      <div className="text-[11px] font-display font-black mt-0.5" style={{ color: `hsl(${mood.primary})` }}>
         {value}
       </div>
     </div>
@@ -332,10 +324,8 @@ function Badge({ icon, label, value, mood }: { icon: React.ReactNode; label: str
 function FomoStat({ n, label, mood }: { n: number; label: string; mood: Mood }) {
   return (
     <div className="rounded-xl border border-white/10 bg-card/40 backdrop-blur-sm px-2 py-3 text-center">
-      <div
-        className="font-display font-black text-2xl tabular-nums"
-        style={{ color: `hsl(${mood.primary})`, textShadow: `0 0 14px hsl(${mood.primary} / 0.55)` }}
-      >
+      <div className="font-display font-black text-2xl tabular-nums"
+        style={{ color: `hsl(${mood.primary})`, textShadow: `0 0 14px hsl(${mood.primary} / 0.55)` }}>
         {n}
       </div>
       <div className="text-[10px] leading-tight text-muted-foreground mt-0.5">{label}</div>

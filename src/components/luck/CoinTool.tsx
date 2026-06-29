@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import coinHeads from '@/assets/luck/coin-heads.svg';
+import coinTails from '@/assets/luck/coin-tails.svg';
 
 type Side = 'H' | 'T';
 
@@ -37,7 +39,6 @@ const CoinTool = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="relative min-h-[100dvh] max-w-[430px] mx-auto bg-background flex flex-col px-5 pt-6 pb-8 overflow-hidden">
-      <div className="vs-atmosphere" style={{ ['--vs-intensity' as string]: flipping ? 1 : 0.4 }} />
 
       <div className="relative flex items-center justify-between mb-3 z-10">
         <button onClick={onBack} className="h-10 w-10 grid place-items-center rounded-full bg-card border border-white/[0.08] active:scale-95" aria-label="Back">
@@ -67,21 +68,13 @@ const CoinTool = ({ onBack }: { onBack: () => void }) => {
               transform: !flipping && side === 'T' ? 'rotateY(180deg)' : 'rotateY(0deg)',
             }}
           >
-            {/* Heads */}
-            <div className="luck-coin-face absolute inset-0 rounded-full grid place-items-center font-display font-bold text-6xl border-4 border-primary/50 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.7)]"
-              style={{ background: 'radial-gradient(circle at 35% 30%, hsl(var(--primary) / 0.9), hsl(var(--primary) / 0.4) 70%, hsl(var(--primary) / 0.2))' }}>
-              <span className="text-primary-foreground drop-shadow-md">H</span>
+            <div className="luck-coin-face absolute inset-0 rounded-full grid place-items-center overflow-hidden drop-shadow-[0_20px_30px_rgba(0,0,0,0.45)]" style={{ backfaceVisibility: 'hidden' }}>
+              <img src={coinHeads} alt="Heads" draggable={false} className="w-full h-full object-contain select-none pointer-events-none" />
             </div>
-            {/* Tails */}
-            <div className="luck-coin-face absolute inset-0 rounded-full grid place-items-center font-display font-bold text-6xl border-4 border-accent/50 shadow-[0_20px_60px_-15px_hsl(var(--accent)/0.7)]"
-              style={{
-                transform: 'rotateY(180deg)',
-                background: 'radial-gradient(circle at 65% 30%, hsl(var(--accent) / 0.9), hsl(var(--accent) / 0.4) 70%, hsl(var(--accent) / 0.2))',
-              }}>
-              <span className="text-accent-foreground drop-shadow-md">T</span>
+            <div className="luck-coin-face absolute inset-0 rounded-full grid place-items-center overflow-hidden drop-shadow-[0_20px_30px_rgba(0,0,0,0.45)]" style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}>
+              <img src={coinTails} alt="Tails" draggable={false} className="w-full h-full object-contain select-none pointer-events-none" />
             </div>
           </div>
-          {/* Shadow */}
           <div className={`mx-auto mt-3 h-2 rounded-full bg-black/40 blur-md transition-all duration-300 ${flipping ? 'w-20 opacity-30' : 'w-32 opacity-60'}`} />
         </div>
 
@@ -95,12 +88,7 @@ const CoinTool = ({ onBack }: { onBack: () => void }) => {
           <div className="flex flex-col items-center gap-2">
             <div className="flex gap-2">
               {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className={`w-9 h-9 rounded-lg border grid place-items-center text-sm font-semibold transition-all ${
-                    history[i] ? 'bg-primary/15 border-primary text-foreground luck-pop' : 'bg-card border-white/[0.08] text-muted-foreground/40'
-                  }`}
-                >
+                <div key={i} className={`w-9 h-9 rounded-lg border grid place-items-center text-sm font-semibold transition-all ${history[i] ? 'bg-primary/15 border-primary text-foreground luck-pop' : 'bg-card border-white/[0.08] text-muted-foreground/40'}`}>
                   {history[i] ?? '·'}
                 </div>
               ))}
@@ -110,11 +98,8 @@ const CoinTool = ({ onBack }: { onBack: () => void }) => {
         )}
       </div>
 
-      <button
-        onClick={flip}
-        disabled={flipping}
-        className="relative mt-6 w-full bg-primary text-primary-foreground font-display font-semibold py-4 rounded-xl active:scale-[0.98] transition-all disabled:opacity-60 z-10 vs-pulse-glow"
-      >
+      <button onClick={flip} disabled={flipping}
+        className="relative mt-6 w-full bg-primary text-primary-foreground font-display font-semibold py-4 rounded-xl active:scale-[0.98] transition-all disabled:opacity-60 z-10">
         {flipping ? 'Flipping…' : 'Flip the coin'}
       </button>
     </div>

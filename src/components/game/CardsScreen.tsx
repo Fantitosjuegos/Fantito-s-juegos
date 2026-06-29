@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import { GameCard } from '@/lib/game-types';
-import { Language, ConsumptionType, GameMode, OnboardingState, VIBES } from '@/lib/onboarding-types';
-import { isRTL } from '@/lib/translations';
+import { Language, ConsumptionType, GameMode, OnboardingState, VIBES, GAME_MODES, CONSUMPTION_TYPES, PLAYER_AVATAR_MAP } from '@/lib/onboarding-types';import { isRTL } from '@/lib/translations';
 import { RotateCcw, Sparkles, Settings, X } from 'lucide-react';
 import { trackSkippedCard, trackDoneCard, trackStarredCard } from '@/lib/skip-tracking';
 import { resetLiveFeedback } from '@/lib/session-feedback';
@@ -178,7 +177,7 @@ const CardsScreen = ({
         lang={lang}
         cards={cards}
         stats={{ ...stats, remainingInQueue: Math.max(20, 60 - stats.done) }}
-        players={playerNames}
+        players={players}
         vibes={vibes}
         consumptions={consumptions}
         mode={mode}
@@ -376,23 +375,70 @@ const SettingsRecapSheet = ({
             {players.length === 0 && <span className="text-sm text-muted-foreground">{l.none}</span>}
             {players.map(p => (
               <span key={p.name} className="inline-flex items-center gap-1 text-xs font-display font-semibold bg-background/60 border border-white/[0.08] px-2 py-1 rounded-full text-foreground">
-                <span className="text-sm leading-none">{p.emoji}</span>
+                {PLAYER_AVATAR_MAP[p.emoji]
+                  ? <img src={PLAYER_AVATAR_MAP[p.emoji]} alt="" className="w-4 h-4 object-contain shrink-0" />
+                  : <span className="text-sm leading-none">{p.emoji}</span>}
                 {p.name}
               </span>
             ))}
           </div>
         </RecapRow>
-
+ 
         <RecapRow label={l.mode}>
-          <span className="text-sm font-display font-semibold text-foreground capitalize">{modeLabel}</span>
+          {(() => {
+            const m = GAME_MODES.find(x => x.id === modeLabel);
+            return m ? (
+              <div className="flex items-center gap-2">
+                <img src={m.icon} alt="" className="w-7 h-7 object-contain" />
+                <span className="text-sm font-display font-semibold text-foreground capitalize">{m.labelKey}</span>
+              </div>
+            ) : (
+              <span className="text-sm font-display font-semibold text-foreground capitalize">{modeLabel}</span>
+            );
+          })()}
         </RecapRow>
 
         <RecapRow label={l.vibes}>
-          <span className="text-sm text-foreground capitalize">{vibeLabels}</span>
+          <div className="flex flex-wrap gap-1.5">
+            {vibes.length === 0
+              ? <span className="text-sm text-muted-foreground">{l.none}</span>
+              : vibes.map(v => {
+                  const meta = VIBES.find(x => x.id === v);
+                  if (!meta) return null;
+                  return (
+                    <span key={v} className="inline-flex items-center gap-1 text-xs font-display font-semibold bg-background/60 border border-white/[0.08] px-2 py-1 rounded-full text-foreground">
+                      {meta.icon
+                        ? <img src={meta.icon} alt="" className="w-4 h-4 object-contain" />
+                        : <span>{meta.emoji}</span>}
+                      {meta.labelKey}
+                    </span>
+                  );
+                })}
+          </div>
         </RecapRow>
 
         <RecapRow label={l.consumption}>
-          <span className="text-sm text-foreground capitalize">{consumptionLabel}</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {consumptions.length === 0
+              ? <span className="text-sm text-muted-foreground">{l.none}</span>
+              : consumptions.map(c => {
+                  const meta = CONSUMPTION_TYPES.find(x => x.id === c);
+                  if (!meta) return null;
+                  return (
+                    <span key={c} className="inline-flex items-center gap-1 text-xs font-display font-semibold bg-background/60 border border-white/[0.08] px-2 py-1 rounded-full text-foreground">
+                      {meta.icon
+                        ? <img src={meta.icon} alt="" className="w-4 h-4 object-contain" />
+                        : <span>{meta.emoji}</span>}
+                      {meta.labelKey}
+                    </span>
+                  );
+                })}
+            {consumptions.length > 0 && state?.consumptionLevel && (
+              <span className="text-xs font-display font-bold text-primary bg-primary/10 border border-primary/30 px-2 py-1 rounded-full">
+                lvl {state.consumptionLevel}/5
+              </span>
+            )}
+          </div>
         </RecapRow>
 
         <RecapRow label={l.scene}>
