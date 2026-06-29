@@ -56,6 +56,7 @@ const QUICK_CHIPS = [
   { key: 'someoneHasCrush' as const, emoji: '👀' },
   { key: 'reunion' as const,         emoji: '🫂' },
   { key: 'firstTime' as const,       emoji: '✨' },
+  { key: 'justVibing' as const,      emoji: '💫' },
 ];
 
 const INTENSITY_EMOJIS = ['🌸', '🌤️', '🔥', '🌶️', '💀'];
@@ -94,8 +95,8 @@ const VibeSettingsScreen = ({
   };
 
   const ctaReady = selectedVibes.length > 0 && players.length >= 2;
-  const ctaLabel = t(lang, 'launchChaos') || 'Generate the chaos';
-  const ctaSub   = t(lang, 'launchChaosSub') || 'AI creates your game instantly';
+  const ctaLabel = t(lang, 'launchChaos') || 'Yalla !';
+  const ctaSub   = '';
 
   const ORBIT_R = 96;
   const ORBIT_DUR = 38;
@@ -179,20 +180,23 @@ const VibeSettingsScreen = ({
                   transformOrigin: '0 0',
                 }}>
                   <button onClick={() => handleVibe(vibe.id)} aria-pressed={active}
-                    className={`vs-orbit-card relative w-[72px] h-[72px] rounded-full border-2 flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95
-                      ${active
-                        ? 'border-primary bg-primary/20'
-                        : 'border-white/20 bg-card/80 hover:border-primary/50'}`}
-                    style={active ? { boxShadow: '0 0 24px -4px hsl(var(--primary) / 0.7)' } : undefined}>
-                    {vibe.icon
-                      ? <img src={vibe.icon} alt={vibe.id} className="w-10 h-10 object-contain rounded-full"
-                          style={active ? { animation: 'vs-float-y 2.4s ease-in-out infinite' } : undefined} />
-                      : <span className="text-2xl leading-none">{vibe.emoji}</span>}
-                    <span className={`text-[9px] font-display font-bold uppercase tracking-wide mt-0.5
-                      ${active ? 'text-foreground' : 'text-foreground/70'}`}>
+                    className={`vs-orbit-card group relative w-[92px] h-[110px] flex flex-col items-center justify-start gap-1 pt-1.5 pb-1.5 px-1 bg-transparent border-0 transition-transform active:scale-95
+                      ${active ? 'scale-105' : ''}`}>
+                    {vibe.icon ? (
+                      <img src={vibe.icon} alt=""
+                        className="flex-1 w-full h-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+                        style={active ? { animation: 'vs-float-y 2.4s ease-in-out infinite' } : undefined}
+                        draggable={false} />
+                    ) : (
+                      <span className="text-3xl leading-none"
+                        style={active ? { animation: 'vs-float-y 2.4s ease-in-out infinite' } : undefined}>
+                        {vibe.emoji}
+                      </span>
+                    )}
+                    <span className={`text-[10px] font-display font-bold uppercase tracking-wide ${active ? 'text-primary' : 'text-foreground/80'}`}>
                       {t(lang, vibe.labelKey as TranslationKey)}
                     </span>
-                    {active && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />}
+                    {active && <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />}
                   </button>
                 </div>
               );
@@ -252,19 +256,10 @@ const VibeSettingsScreen = ({
 
         {/* CTA */}
         <div className="mt-auto pt-3 pb-1">
-          <button onClick={onNext} disabled={!ctaReady}
-            className="relative w-full overflow-hidden rounded-xl py-3.5 font-display font-bold text-base text-primary-foreground transition-all active:scale-[0.98] disabled:opacity-40"
-            style={{ background: ctaReady ? 'linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)' : 'hsl(var(--primary))' }}>
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4" />{ctaLabel}
-            </span>
-            <span className="relative z-10 block text-[10.5px] font-medium opacity-85 mt-0.5">{ctaSub}</span>
-          </button>
-          {!ctaReady && (
-            <p className="mt-2 text-center text-[11px] text-muted-foreground">
-              {players.length < 2 ? 'Add at least 2 players first.' : 'Pick at least one vibe to wake Fantito up.'}
-            </p>
-          )}
+        <button onClick={onNext} disabled={!ctaReady}
+          className="relative w-full bg-primary text-primary-foreground rounded-full py-6 font-display font-bold text-2xl active:scale-[0.98] transition-transform disabled:opacity-40">
+          {ctaLabel}
+        </button>
         </div>
       </div>
 
@@ -284,16 +279,20 @@ const VibeSettingsScreen = ({
       {/* ── Consumption Sheet ── */}
       <Sheet open={openPanel === 'consumption'} onOpenChange={(o) => !o && setOpenPanel(null)}>
         <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-          <PanelHeader title="How are we feeling tonight?" subtitle="Pick any combo — Fantito calibrates." onClose={() => setOpenPanel(null)} />
-          <div className="grid grid-cols-2 gap-2 mt-4">
+          <PanelHeader title="How are we feeling tonight?" subtitle="Pick any combo — Fantito calibrates."/>
+          <div className="grid grid-cols-2 gap-3 mt-4 justify-items-center">
             {CONSUMPTION_TYPES.map((c) => {
               const active = selectedConsumptions.includes(c.id);
               return (
-                <button key={c.id} onClick={() => handleConsumption(c.id)}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-colors
-                    ${active ? 'border-primary/70 bg-primary/10' : 'border-white/[0.08] bg-card hover:border-white/20'}`}>
-                  {c.icon ? <img src={c.icon} alt={c.id} className="w-8 h-8 object-contain" /> : <span className="text-2xl">{c.emoji}</span>}
-                  <div className="font-display font-bold text-sm text-foreground">{t(lang, c.labelKey as TranslationKey)}</div>
+                <button key={c.id} onClick={() => handleConsumption(c.id)} aria-pressed={active}
+                  className={`group flex flex-col items-center gap-1 p-1 bg-transparent border-0 transition-transform active:scale-95
+                    ${active ? 'scale-[1.06]' : 'opacity-90 hover:opacity-100'}`}>
+                  <img src={c.icon} alt=""
+                    className={`w-20 h-20 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)] ${active ? 'drop-shadow-[0_0_14px_hsl(var(--primary)/0.55)]' : ''}`}
+                    draggable={false} />
+                  <div className={`font-display font-bold text-sm ${active ? 'text-primary' : 'text-foreground'}`}>
+                    {t(lang, c.labelKey as TranslationKey)}
+                  </div>
                 </button>
               );
             })}
@@ -320,17 +319,26 @@ const VibeSettingsScreen = ({
       {/* ── Scene Sheet ── */}
       <Sheet open={openPanel === 'scene'} onOpenChange={(o) => !o && setOpenPanel(null)}>
         <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-          <PanelHeader title="What's the scene?" subtitle="Set the stage. The questions will follow." onClose={() => setOpenPanel(null)} />
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {SCENES.map((s) => {
+        <PanelHeader title="What's the scene?" subtitle="Set the stage. The questions will follow." />          <div className="grid grid-cols-6 gap-x-2 gap-y-4 mt-4">
+            {SCENES.map((s, i) => {
               const active = contextValue === s.id;
+              const span = i < 2 ? 'col-span-3' : 'col-span-2';
+              const iconSize = i < 2 ? 'w-28 h-28' : 'w-24 h-24';
               return (
-                <button key={s.id} onClick={() => handleScene(s.id)}
-                  className={`relative flex items-center gap-2.5 p-3 rounded-xl border text-left overflow-hidden transition-colors
-                    ${active ? 'border-primary/70 bg-primary/10' : 'border-white/[0.08] bg-card hover:border-white/20'}`}
-                  style={active ? { boxShadow: `0 0 22px -6px hsl(var(${s.tintVar}) / 0.6)` } : undefined}>
-                  {s.icon ? <img src={s.icon} alt={s.id} className="w-7 h-7 object-contain" /> : <span className="text-2xl">{s.emoji}</span>}
-                  <div className="font-display font-bold text-sm text-foreground">{t(lang, s.labelKey as TranslationKey)}</div>
+                <button key={s.id} onClick={() => handleScene(s.id)} aria-pressed={active}
+                  className={`${span} group relative flex flex-col items-center gap-1.5 p-1 bg-transparent border-0 transition-transform active:scale-95
+                    ${active ? 'scale-[1.06]' : 'opacity-90 hover:opacity-100'}`}>
+                  {s.icon ? (
+                    <img src={s.icon} alt={t(lang, s.labelKey as TranslationKey)}
+                      className={`${iconSize} object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] ${active ? 'drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)]' : ''}`}
+                      draggable={false} />
+                  ) : (
+                    <span className="text-6xl leading-none">{s.emoji}</span>
+                  )}
+                  <span className={`font-display font-bold text-[12px] leading-tight text-center px-0.5 line-clamp-2
+                    ${active ? 'text-primary' : 'text-foreground'}`}>
+                    {t(lang, s.labelKey as TranslationKey)}
+                  </span>
                 </button>
               );
             })}
@@ -355,11 +363,17 @@ const VibeSettingsScreen = ({
               {TIMING_OPTIONS.map((opt) => {
                 const active = timing === opt.id;
                 return (
-                  <button key={opt.id} onClick={() => onTimingChange(active ? '' : opt.id)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-colors active:scale-95
-                      ${active ? 'border-primary/70 bg-primary/10' : 'border-white/[0.08] bg-card hover:border-white/20'}`}>
-                    {opt.icon ? <img src={opt.icon} alt={opt.id} className="w-6 h-6 object-contain" /> : <span className="text-xl">{opt.emoji}</span>}
-                    <span className="text-[11px] font-display font-bold text-foreground">{opt.label}</span>
+                  <button key={opt.id} onClick={() => onTimingChange(active ? '' : opt.id)} aria-pressed={active}
+                    className={`flex flex-col items-center gap-1.5 p-1 bg-transparent border-0 transition-transform active:scale-95
+                      ${active ? 'scale-[1.06]' : 'opacity-90 hover:opacity-100'}`}>
+                    {opt.icon
+                      ? <img src={opt.icon} alt={opt.label}
+                          className={`w-24 h-24 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] ${active ? 'drop-shadow-[0_0_18px_hsl(var(--primary)/0.6)]' : ''}`}
+                          draggable={false} />
+                      : <span className="text-6xl leading-none">{opt.emoji}</span>}
+                    <span className={`text-[12px] font-display font-bold ${active ? 'text-primary' : 'text-foreground'}`}>
+                      {opt.label}
+                    </span>
                   </button>
                 );
               })}
@@ -371,24 +385,38 @@ const VibeSettingsScreen = ({
       {/* ── Game Types Sheet ── */}
       <Sheet open={openPanel === 'gametypes'} onOpenChange={(o) => !o && setOpenPanel(null)}>
         <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-          <PanelHeader title="Game types" subtitle="Optional — pick 2+ to lock the deck. Skip to let Fantito mix everything." onClose={() => setOpenPanel(null)} />
-          <div className="grid grid-cols-2 gap-2 mt-4">
+          <PanelHeader title="Game types" subtitle="Optional, pick 2 or more to lock the deck. Skip to let Fantito mix everything."/>
+          <div className="grid grid-cols-3 gap-3 mt-4">
             {GAME_TYPES.map((g) => {
               const active = selectedGameTypes.includes(g.id);
               return (
                 <button key={g.id} onClick={() => onToggleGameType(g.id)} aria-pressed={active}
-                  className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition-colors active:scale-[0.98]
-                    ${active ? 'border-primary/70 bg-primary/10' : 'border-white/[0.08] bg-card hover:border-white/20'}`}>
-                  {g.icon ? <img src={g.icon} alt={g.id} className="w-7 h-7 object-contain" /> : <span className="text-xl">{g.emoji}</span>}
-                  <span className="font-display font-bold text-[13px] text-foreground flex-1 min-w-0 truncate">{g.label}</span>
-                  {active && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                  className={`group relative flex flex-col items-center gap-1.5 rounded-2xl p-1.5 transition-all active:scale-[0.97]
+                    ${active ? 'scale-[1.02]' : 'opacity-90 hover:opacity-100'}`}>
+                  <div className={`relative w-full aspect-[3/4] rounded-2xl overflow-hidden transition-all
+                    ${active
+                      ? 'ring-2 ring-primary shadow-[0_8px_24px_-6px_hsl(var(--primary)/0.5)]'
+                      : 'ring-1 ring-white/[0.06] shadow-[0_4px_14px_-6px_rgba(0,0,0,0.4)]'}`}>
+                    <img src={g.icon} alt={g.label}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      draggable={false} />
+                    {active && (
+                      <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center shadow">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <span className={`font-display font-bold text-[11px] leading-tight text-center px-0.5 line-clamp-2
+                    ${active ? 'text-primary' : 'text-foreground'}`}>
+                    {g.label}
+                  </span>
                 </button>
               );
             })}
           </div>
           <div className="mt-4 flex items-center justify-between gap-3">
             <p className="text-[11px] text-muted-foreground">
-              {selectedGameTypes.length === 0 && 'Optional — leave empty for the full mix.'}
+              {selectedGameTypes.length === 0 && 'Optional, leave empty for the full mix.'}
               {selectedGameTypes.length === 1 && 'Pick one more to lock the deck (optional).'}
               {selectedGameTypes.length >= 2 && `🔒 Deck locked to ${selectedGameTypes.length} types.`}
             </p>
@@ -402,7 +430,7 @@ const VibeSettingsScreen = ({
       {/* ── Details Sheet ── */}
       <Sheet open={openPanel === 'details'} onOpenChange={(o) => !o && setOpenPanel(null)}>
         <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-          <PanelHeader title="Extra details?" subtitle="Anything important? Birthdays, breakups, secret crushes…" onClose={() => setOpenPanel(null)} />
+          <PanelHeader title="Extra details?" subtitle="Anything important? Birthdays, breakups, secret crushes…"/>
           <textarea value={detailsValue} onChange={e => onDetailsChange(e.target.value)}
             placeholder="Tell Fantito anything important"
             className="mt-4 w-full bg-card border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/30 transition-colors min-h-[110px] resize-none" />
@@ -414,7 +442,7 @@ const VibeSettingsScreen = ({
                 <button key={chip.key}
                   onClick={() => onDetailsChange(detailsValue ? `${detailsValue}, ${label}` : label)}
                   className="px-3 py-1.5 rounded-full bg-card border border-white/[0.08] text-xs font-display font-semibold text-foreground hover:border-primary/40 active:scale-95 transition-all">
-                  {chip.emoji} {label}
+                  {label}
                 </button>
               );
             })}
@@ -456,15 +484,17 @@ const Banner = ({ icon, title, subtitle, onClick, lockBadge, disabled, hasError 
   </button>
 );
 
-const PanelHeader = ({ title, subtitle, onClose }: { title: string; subtitle?: string; onClose: () => void }) => (
+const PanelHeader = ({ title, subtitle, onClose }: { title: string; subtitle?: string; onClose?: () => void }) => (
   <div className="flex items-start justify-between gap-3">
     <div className="flex-1 min-w-0">
       <h2 className="font-display text-lg font-bold text-foreground leading-tight">{title}</h2>
       {subtitle && <p className="text-[12px] text-muted-foreground mt-1">{subtitle}</p>}
     </div>
-    <button onClick={onClose} className="w-8 h-8 rounded-full bg-card border border-white/[0.08] flex items-center justify-center text-muted-foreground hover:text-foreground" aria-label="Close">
-      <X className="w-4 h-4" />
-    </button>
+    {onClose && (
+      <button onClick={onClose} className="w-8 h-8 rounded-full bg-card border border-white/[0.08] flex items-center justify-center text-muted-foreground hover:text-foreground" aria-label="Close">
+        <X className="w-4 h-4" />
+      </button>
+    )}
   </div>
 );
 

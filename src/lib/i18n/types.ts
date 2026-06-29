@@ -48,6 +48,11 @@ export type TranslationKeys = {
   flirtyRel?: string;
   complicatedRel?: string;
   enemiesRel?: string;
+  howFar?: string;
+  tapCanvasHint?: string;
+  addPlayerBtn?: string;
+  pickEmoji?: string;
+  addBtn?: string;
   // ── Family roles ────────────────────────────────────────────────────────────
   familyBrother?: string;
   familySister?: string;
@@ -123,7 +128,7 @@ export type TranslationKeys = {
   firstTime: string;
   reunion: string;
   someoneHasCrush: string;
-  justVibing: string;
+  justVibing?: string;
   // ── Summary ─────────────────────────────────────────────────────────────────
   allSet: string;
   gameSetup: string;

@@ -121,6 +121,11 @@ const en: TranslationKeys = {
   scene: 'Scene',
   details: 'Details',
   continue_: 'Continue',
+  howFar: 'How far are we going?',
+  tapCanvasHint: 'Tap the canvas to add a player. Drag one onto another to link them.',
+  addPlayerBtn: '+ Add player',
+  pickEmoji: 'Pick an avatar',
+  addBtn: 'Add',
 };
 
 export default en;
