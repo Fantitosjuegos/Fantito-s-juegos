@@ -1,0 +1,4 @@
+# Create the file and add the content
+echo User-agent: * > public\robots.txt
+echo Allow: / >> public\robots.txt
+echo Sitemap: https://fantitosjuegos.fun/sitemap.xml >> public\robots.txt

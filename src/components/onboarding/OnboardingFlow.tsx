@@ -157,6 +157,25 @@ const OnboardingFlow = () => {
       return <GeneratingScreen lang={lang} state={state} />;
     }
 
+    // NEW ERROR STATE BLOCK ADDED HERE
+    if (generationStatus === 'error') {
+      return (
+        <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-4 px-6">
+          <img src="/fantito-loader.svg" className="w-24 h-24 opacity-60" alt="Loading error" />
+          <p className="font-display font-bold text-lg text-foreground text-center">
+            Fantito hit a wall 🧱
+          </p>
+          <p className="text-sm text-muted-foreground text-center">
+            Check your connection and try again.
+          </p>
+          <button onClick={handleRestart}
+            className="px-6 py-3 rounded-full bg-primary text-primary-foreground font-display font-bold">
+            Try again
+          </button>
+        </div>
+      );
+    }
+
     if (generationStatus === 'ready' && generatedCards.length > 0) {
       if (showTutorial) {
         return <SwipeTutorialScreen lang={lang} onGotIt={() => setShowTutorial(false)} />;
