@@ -46,6 +46,7 @@ const PlayersRelationsScreen = ({
   const [bursts,       setBursts]       = useState<{ id: number; x: number; y: number }[]>([]);
   const [addingPlayer, setAddingPlayer] = useState<{ name: string; emoji: string; x: number; y: number } | null>(null);
   const [, force] = useState(0);
+  const [ageGateOpen, setAgeGateOpen] = useState(false);
 
   const { isPremium } = useEntitlements();
   const rtl     = isRTL(lang);
@@ -185,8 +186,7 @@ const PlayersRelationsScreen = ({
               const locked = !isPremium && mode.id === 'nasty18';
               return (
                 <button key={mode.id}
-                  onClick={() => locked ? setModeLockOpen(true) : onGameModeChange(mode.id)}
-                  className={`relative flex flex-col items-center gap-1.5 px-1.5 pt-2 pb-2 rounded-xl border overflow-hidden transition-all active:scale-[0.97]
+                  onClick={() => locked ? setModeLockOpen(true) : mode.id === 'nasty18' ? setAgeGateOpen(true) : onGameModeChange(mode.id)}                  className={`relative flex flex-col items-center gap-1.5 px-1.5 pt-2 pb-2 rounded-xl border overflow-hidden transition-all active:scale-[0.97]
                     ${active ? 'border-primary/70 bg-primary/10' : 'border-white/[0.08] bg-card hover:border-white/20'}
                     ${locked ? 'opacity-60' : ''}`}>
                   {locked && <Lock className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-primary z-10" />}
@@ -403,6 +403,27 @@ const PlayersRelationsScreen = ({
   return (
     <OnboardingLayout step={step} onBack={onBack}>
       {content}
+      {ageGateOpen && (
+        <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm flex items-end justify-center px-4 pb-6">
+          <div className="w-full max-w-[400px] bg-card border border-white/[0.1] rounded-3xl p-6 shadow-2xl">
+            <div className="text-4xl text-center mb-3">🔞</div>
+            <h2 className="font-display font-bold text-lg text-foreground text-center mb-2">Adult content</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Nasty +18 mode contains explicit themes for adults only. By continuing you confirm you are 18 or older.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setAgeGateOpen(false)}
+                className="flex-1 py-3 rounded-xl border border-white/[0.08] text-sm font-display font-semibold text-muted-foreground">
+                Go back
+              </button>
+              <button onClick={() => { onGameModeChange('nasty18'); setAgeGateOpen(false); }}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-display font-bold">
+                I'm 18+
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </OnboardingLayout>
   );
 };

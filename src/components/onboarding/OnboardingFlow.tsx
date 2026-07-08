@@ -15,6 +15,7 @@ import GeneratingScreen from '../game/GeneratingScreen';
 import SwipeTutorialScreen from '../game/SwipeTutorialScreen';
 import CardsScreen from '../game/CardsScreen';
 import LuckMode from '../luck/LuckMode';
+import fantitoLoader from '@/assets/fantito-loader.svg';
 
 const INITIAL_STATE: OnboardingState = {
   language: 'en',
@@ -162,8 +163,7 @@ const OnboardingFlow = () => {
     if (generationStatus === 'error') {
       return (
         <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-4 px-6">
-          <img src="/fantito-loader.svg" className="w-24 h-24 opacity-60" alt="Loading error" />
-          <p className="font-display font-bold text-lg text-foreground text-center">
+        <img src={fantitoLoader} className="w-24 h-24 opacity-60" alt="Loading error" />          <p className="font-display font-bold text-lg text-foreground text-center">
             Fantito hit a wall 🧱
           </p>
           <p className="text-sm text-muted-foreground text-center">
