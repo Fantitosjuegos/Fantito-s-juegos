@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Mail, ArrowLeft, Sparkles, Flame, Eye, Skull, Heart, Trash2 } from 'lucide-react';
 import fantitoLoader from '@/assets/fantito-loader.svg';
+import PrivacyModal from '@/components/PrivacyModal';
 
 const emailSchema    = z.string().trim().email({ message: 'Invalid email' }).max(255);
 const passwordSchema = z.string().min(6, { message: 'Password must be at least 6 characters' }).max(72);
@@ -28,12 +29,13 @@ const PERKS = [
 ];
 
 const Auth = () => {
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
-  const [params]   = useSearchParams();
-  const redirect   = params.get('redirect') ?? '/';
+  const [params] = useSearchParams();
+  const redirect = params.get('redirect') ?? '/';
   const [mode, setMode]             = useState<'signin' | 'signup'>('signin');
   const [showEmail, setShowEmail]   = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
   const [staySignedIn, setStaySignedIn] = useState(true);
@@ -47,7 +49,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
-      // User is already logged in — show account management instead of login form
+      // stay on page to show account management
     }
   }, [user, authLoading, navigate, redirect]);
 
@@ -120,17 +122,13 @@ const Auth = () => {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      // Delete user data from profiles table first
       if (user) {
         await supabase.from('profiles').delete().eq('user_id', user.id);
         await supabase.from('skipped_cards').delete().eq('user_id', user.id);
         await supabase.from('promo_redemptions').delete().eq('user_id', user.id);
       }
-      // Delete the auth user via admin RPC (Mayssa needs to create this)
-      // For now: sign out and clear storage — full deletion handled server-side
       const { error } = await supabase.rpc('delete_user_account');
       if (error) {
-        // Fallback: just sign out and clear storage
         await storage.remove('fantito_ephemeral_session');
         await signOut();
         toast({ title: 'Signed out', description: 'Contact us at privacy@fantitosjuegos.fun to fully delete your data.' });
@@ -150,24 +148,17 @@ const Auth = () => {
 
   const dots = useMemo(
     () => Array.from({ length: 16 }).map((_, i) => ({
-      id:    i,
-      left:  (i * 53) % 100,
-      top:   (i * 37) % 100,
-      delay: ((i % 7) * 0.4).toFixed(2),
-      size:  2 + (i % 3),
-    })),
-    [],
+      id: i, left: (i * 53) % 100, top: (i * 37) % 100,
+      delay: ((i % 7) * 0.4).toFixed(2), size: 2 + (i % 3),
+    })), [],
   );
 
-  // ── If user is already logged in → show account management ─────────────────
+  // ── Account management screen (when already logged in) ─────────────────────
   if (!authLoading && user) {
     return (
       <main className="relative min-h-[100dvh] max-w-[430px] mx-auto bg-background overflow-hidden flex flex-col px-5 pt-6 pb-8">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-xs font-display font-semibold text-muted-foreground hover:text-foreground transition-colors mb-8 self-start"
-        >
+        <button type="button" onClick={() => navigate('/')}
+          className="flex items-center gap-1.5 text-xs font-display font-semibold text-muted-foreground hover:text-foreground transition-colors mb-8 self-start">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to game
         </button>
 
@@ -177,46 +168,37 @@ const Auth = () => {
           <p className="text-sm text-muted-foreground mt-1">{user.email}</p>
         </div>
 
-        <button
-          onClick={() => { signOut(); navigate('/'); }}
-          className="w-full bg-card border border-white/[0.08] text-foreground font-display font-semibold py-3.5 rounded-2xl active:scale-[0.98] transition-all mb-4"
-        >
+        <button onClick={() => { signOut(); navigate('/'); }}
+          className="w-full bg-card border border-white/[0.08] text-foreground font-display font-semibold py-3.5 rounded-2xl active:scale-[0.98] transition-all mb-4">
           Sign out
+        </button>
+
+        <button type="button" onClick={() => setShowPrivacy(true)}
+          className="text-center text-[11px] text-muted-foreground hover:text-foreground transition-colors mb-4">
+          Privacy Policy
         </button>
 
         {/* Delete account — Apple mandatory */}
         <div className="mt-auto border-t border-white/[0.06] pt-6">
           {!showDeleteConfirm ? (
-            <button
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full flex items-center justify-center gap-2 text-destructive/70 hover:text-destructive text-sm font-display font-semibold transition-colors py-2"
-            >
+            <button type="button" onClick={() => setShowDeleteConfirm(true)}
+              className="w-full flex items-center justify-center gap-2 text-destructive/70 hover:text-destructive text-sm font-display font-semibold transition-colors py-2">
               <Trash2 className="w-4 h-4" />
               Delete my account
             </button>
           ) : (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
-              <p className="font-display font-bold text-sm text-foreground text-center mb-1">
-                Delete your account?
-              </p>
+              <p className="font-display font-bold text-sm text-foreground text-center mb-1">Delete your account?</p>
               <p className="text-[11px] text-muted-foreground text-center mb-4">
-                This permanently removes all your data — cards, progress, and profile. This cannot be undone.
+                This permanently removes all your data. This cannot be undone.
               </p>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-white/[0.08] text-sm font-display font-semibold text-muted-foreground active:scale-[0.98]"
-                >
+                <button type="button" onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-white/[0.08] text-sm font-display font-semibold text-muted-foreground active:scale-[0.98]">
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteAccount}
-                  disabled={deleting}
-                  className="flex-1 py-2.5 rounded-xl bg-destructive text-white text-sm font-display font-bold active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                >
+                <button type="button" onClick={handleDeleteAccount} disabled={deleting}
+                  className="flex-1 py-2.5 rounded-xl bg-destructive text-white text-sm font-display font-bold active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
                   {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {deleting ? 'Deleting…' : 'Yes, delete'}
                 </button>
@@ -224,6 +206,8 @@ const Auth = () => {
             </div>
           )}
         </div>
+
+        <PrivacyModal open={showPrivacy} onClose={() => setShowPrivacy(false)} />
       </main>
     );
   }
@@ -240,14 +224,11 @@ const Auth = () => {
         <meta property="og:url" content="https://fantitosjuegos.fun/auth" />
       </Helmet>
 
-      {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute inset-0" style={{
-          background: `
-            radial-gradient(60% 40% at 50% 0%, hsl(var(--primary) / 0.28), transparent 70%),
+          background: `radial-gradient(60% 40% at 50% 0%, hsl(var(--primary) / 0.28), transparent 70%),
             radial-gradient(50% 35% at 12% 80%, hsl(var(--accent) / 0.22), transparent 70%),
-            radial-gradient(45% 30% at 88% 70%, hsl(var(--primary) / 0.18), transparent 70%)
-          `,
+            radial-gradient(45% 30% at 88% 70%, hsl(var(--primary) / 0.18), transparent 70%)`,
           filter: 'blur(2px)',
         }} />
         {dots.map(d => (
@@ -262,7 +243,6 @@ const Auth = () => {
       </button>
 
       <div className="relative z-10 flex-1 flex flex-col px-5 pt-2 pb-6">
-        {/* Mascot + tagline */}
         <div className="flex flex-col items-center text-center pt-2 pb-5">
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl blur-2xl vs-pulse-glow" style={{ background: 'hsl(var(--primary) / 0.6)' }} />
@@ -284,7 +264,6 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Perks grid */}
         <div className="grid grid-cols-2 gap-2 mb-5">
           {PERKS.slice(0, 4).map(({ icon: Icon, label }, i) => (
             <div key={label} className="vs-rise rounded-xl border border-white/10 bg-card/50 backdrop-blur-sm px-3 py-2.5 flex items-center gap-2" style={{ animationDelay: `${i * 70}ms` }}>
@@ -294,10 +273,9 @@ const Auth = () => {
           ))}
         </div>
 
-        {/* OAuth buttons */}
         <div className="space-y-2.5">
           <button type="button" onClick={() => handleOAuth('google')} disabled={!!oauthBusy}
-            className="relative w-full flex items-center justify-center gap-2.5 bg-foreground text-background font-display font-bold text-base py-3.5 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-60 vs-pulse-glow overflow-hidden"
+            className="relative w-full flex items-center justify-center gap-2.5 bg-foreground text-background font-display font-bold text-base py-3.5 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-60 overflow-hidden"
             style={{ boxShadow: '0 0 24px -6px hsl(var(--primary) / 0.7)' }}>
             {oauthBusy === 'google' ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleGlyph />}
             <span>{isSignup ? 'Sign up with Google' : 'Continue with Google'}</span>
@@ -312,10 +290,14 @@ const Auth = () => {
             </button>
           )}
 
-          <p className="text-center text-[11px] text-muted-foreground pt-1">Takes ~3 seconds · No setup</p>
+          <p className="text-center text-[10px] text-muted-foreground px-4">
+            By signing in, you agree to our{' '}
+            <button onClick={() => setShowPrivacy(true)} className="underline hover:text-primary transition-colors">
+              Privacy Policy
+            </button>.
+          </p>
         </div>
 
-        {/* Email fallback */}
         {!showEmail ? (
           <button type="button" onClick={() => setShowEmail(true)}
             className="mt-5 mx-auto flex items-center gap-1.5 text-xs font-display font-semibold text-muted-foreground hover:text-foreground transition-colors">
@@ -351,7 +333,6 @@ const Auth = () => {
           </form>
         )}
 
-        {/* Mode toggle */}
         <div className="mt-auto pt-6 text-center">
           <button type="button" onClick={() => { setMode(isSignup ? 'signin' : 'signup'); setShowEmail(false); }}
             className="text-sm font-display text-muted-foreground hover:text-foreground transition-colors">
@@ -359,6 +340,8 @@ const Auth = () => {
           </button>
         </div>
       </div>
+
+      <PrivacyModal open={showPrivacy} onClose={() => setShowPrivacy(false)} />
     </main>
   );
 };
