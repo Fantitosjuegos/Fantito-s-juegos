@@ -25,9 +25,8 @@ export const useEntitlements = (): Entitlements => {
 
   const refresh = useCallback(async () => {
     if (!user) {
-      // Anonymous baseline: 25 free cards (1 deck = 1 free game) before signup is required.
-      setCardsRemaining(25);
-      setPremiumStatus('credits');
+      setCardsRemaining(9999);
+      setPremiumStatus('subscribed');
       setSubscriptionEnd(null);
       setMoneyAllocationState('reinvest');
       setLoading(false);
@@ -39,8 +38,8 @@ export const useEntitlements = (): Entitlements => {
       .eq('user_id', user.id)
       .maybeSingle();
     if (data) {
-      setCardsRemaining(data.cards_remaining ?? 0);
-      setPremiumStatus((data.premium_status ?? 'free') as 'free' | 'credits' | 'subscribed');
+      setCardsRemaining(data.cards_remaining ?? 9999);
+      setPremiumStatus((data.premium_status ?? 'subscribed') as 'free' | 'credits' | 'subscribed');
       setSubscriptionEnd(data.subscription_end_date ?? null);
       setMoneyAllocationState((data.money_allocation ?? 'reinvest') as MoneyAllocation);
     }
@@ -57,11 +56,9 @@ export const useEntitlements = (): Entitlements => {
     await supabase.from('profiles').update({ money_allocation: v }).eq('user_id', user.id);
   }, [user]);
 
-  const isSubscribed =
-    premiumStatus === 'subscribed' &&
-    !!subscriptionEnd &&
-    new Date(subscriptionEnd) > new Date();
-  const isPremium = isSubscribed || cardsRemaining > 0;
+  // v1.0 — fully free launch, all features unlocked for everyone
+  const isPremium = true;
+  const isSubscribed = true;
 
-  return { isPremium, isSubscribed, cardsRemaining, premiumStatus, moneyAllocation, setMoneyAllocation, loading, refresh };
+  return { isPremium, isSubscribed, cardsRemaining: 9999, premiumStatus, moneyAllocation, setMoneyAllocation, loading, refresh };
 };
