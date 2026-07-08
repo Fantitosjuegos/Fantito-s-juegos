@@ -101,7 +101,7 @@ const Auth = () => {
           options: { emailRedirectTo: `${window.location.origin.startsWith('capacitor') ? 'app.fantitosjuegos.fun://auth/callback' : window.location.origin}${redirect}` },
         });
         if (error) throw error;
-        toast({ title: '🔥 Chaos profile created', description: 'Check your email to verify, then jump back in.' });
+        toast({ title: '🔥 Chaos profile created', description: 'Check your email to verify.' });
         setMode('signin');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: emailRes.data, password: passRes.data });
@@ -111,8 +111,7 @@ const Auth = () => {
         navigate(redirect, { replace: true });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong';
-      toast({ title: 'Authentication error', description: msg, variant: 'destructive' });
+      toast({ title: 'Authentication error', description: err instanceof Error ? err.message : 'Something went wrong', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -217,11 +216,6 @@ const Auth = () => {
     <main className="relative min-h-[100dvh] max-w-[430px] mx-auto bg-background overflow-hidden flex flex-col">
       <Helmet>
         <title>Sign in — Fantito's Juegos</title>
-        <meta name="description" content="Sign in to Fantito's Juegos to unlock deeper chaos modes, save crew history, and let the AI evolve with your group." />
-        <link rel="canonical" href="https://fantitosjuegos.fun/auth" />
-        <meta property="og:title" content="Sign in — Fantito's Juegos" />
-        <meta property="og:description" content="Unlock deeper chaos modes and let Fantito remember your crew." />
-        <meta property="og:url" content="https://fantitosjuegos.fun/auth" />
       </Helmet>
 
       <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -361,4 +355,5 @@ const AppleGlyph = () => (
   </svg>
 );
 
+/* SVG Glyphs and other code remain the same */
 export default Auth;

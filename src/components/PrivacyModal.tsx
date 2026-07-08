@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface PrivacyModalProps {
   open: boolean;

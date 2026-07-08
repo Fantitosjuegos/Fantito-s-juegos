@@ -8,7 +8,7 @@ import { storage } from '@/lib/storage';
 import StartScreen from './StartScreen';
 import { useAuth } from '@/hooks/useAuth';
 import PaywallModal from '../PaywallModal';
-
+import { AgeGateModal, hasConfirmedAge } from './AgeGateModal';
 import VibeSettingsScreen from './VibeSettingsScreen';
 import SummaryScreen from './SummaryScreen';
 import GeneratingScreen from '../game/GeneratingScreen';
@@ -47,7 +47,8 @@ const OnboardingFlow = () => {
   const promptRef = useRef<ComposedPrompt | null>(null);
   const restLoadedRef = useRef(false);
   const tutorialShownRef = useRef(false);
-
+  const [showAgeGate, setShowAgeGate] = useState(false);
+  const [pendingMode, setPendingMode] = useState<GameMode | null>(null);
   // Persist player names for Luck tools
   useEffect(() => {
     if (state.players.length > 0) {
@@ -234,7 +235,17 @@ const OnboardingFlow = () => {
               updateState('selectedConsumptions', cur.includes(c) ? cur.filter(x => x !== c) : [...cur, c]);
             }}
             onConsumptionLevelChange={(l: Intensity) => updateState('consumptionLevel', l)}
-            onGameModeChange={(m: GameMode) => updateState('gameMode', m)}
+            onGameModeChange={async (m: GameMode) => {
+  if (m === 'nasty18') {
+    const confirmed = await hasConfirmedAge();
+    if (!confirmed) {
+      setPendingMode(m);
+      setShowAgeGate(true);
+      return;
+    }
+  }
+  updateState('gameMode', m);
+}}
             onContextChange={(v: string) => {
               updateState('contextState', v);
               if (v !== 'house-party' && v !== 'chill-night') updateState('hostPlayerId', undefined);
@@ -277,6 +288,19 @@ const OnboardingFlow = () => {
         onClose={() => setShowAnonPaywall(false)}
         reason="You've used your free game! Sign up to unlock 5 free games (125 cards) and keep the chaos going. Luck games stay free forever."
       />
+{showAgeGate && (
+  <AgeGateModal
+    onConfirm={() => {
+      setShowAgeGate(false);
+      if (pendingMode) updateState('gameMode', pendingMode);
+      setPendingMode(null);
+    }}
+    onCancel={() => {
+      setShowAgeGate(false);
+      setPendingMode(null);
+    }}
+  />
+)}
     </>
   );
 };
