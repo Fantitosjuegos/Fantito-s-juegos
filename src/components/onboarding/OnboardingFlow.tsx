@@ -15,6 +15,8 @@ import GeneratingScreen from '../game/GeneratingScreen';
 import SwipeTutorialScreen from '../game/SwipeTutorialScreen';
 import CardsScreen from '../game/CardsScreen';
 import LuckMode from '../luck/LuckMode';
+import AIConsentModal from '@/components/AIConsentModal';
+import PrivacyModal from '@/components/PrivacyModal';
 
 const INITIAL_STATE: OnboardingState = {
   language: 'en',
@@ -48,6 +50,7 @@ const OnboardingFlow = () => {
   const tutorialShownRef = useRef(false);
   const [showAgeGate, setShowAgeGate] = useState(false);
   const [pendingMode, setPendingMode] = useState<GameMode | null>(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   // Persist player names for Luck tools
   useEffect(() => {
     if (state.players.length > 0) {
@@ -301,6 +304,8 @@ const OnboardingFlow = () => {
     }}
   />
 )}
+      <AIConsentModal lang={lang} onPrivacy={() => setShowPrivacy(true)} />
+      <PrivacyModal open={showPrivacy} onClose={() => setShowPrivacy(false)} />
     </>
   );
 };
