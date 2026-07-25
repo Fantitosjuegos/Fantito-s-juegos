@@ -77,7 +77,7 @@ const VoteCard = ({ card, mood, fallbackPlayers, mode, lang = 'en', onComplete }
   // ─────────────────────────────────────
   // Anonymous (nasty) flow
   // ─────────────────────────────────────
-  if (isNasty) {
+  if (true) {
     if (revealed) {
       return (
         <div className="flex-1 flex flex-col px-5 pt-5 pb-4">
