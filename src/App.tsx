@@ -9,7 +9,6 @@ import { OfflineBanner } from "./components/OfflineBanner";
 import { AuthProvider } from "./hooks/useAuth";
 import { AuthGuard } from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { useInactivity } from "./hooks/useInactivity";
 
 const Index     = lazy(() => import("./pages/Index"));
 const Auth      = lazy(() => import("./pages/Auth"));
@@ -46,11 +45,6 @@ const setupNative = async () => {
   }
 };
 
-const InactivityTracker = () => {
-  useInactivity();
-  return null;
-};
-
 function PageLoader() {
   return (
     <div style={{
@@ -84,7 +78,6 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <NativeSetup />
-          <InactivityTracker />
           <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
