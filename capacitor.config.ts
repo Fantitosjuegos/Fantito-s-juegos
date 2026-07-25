@@ -17,8 +17,8 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true,
     },
     SplashScreen: {
-      launchShowDuration: 2000,
-      launchAutoHide: true,
+      launchShowDuration: 0,       // Show splash for 0ms — let app control dismissal
+      launchAutoHide: false,        // We hide it manually after React mounts
       backgroundColor: '#0a0a0a',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
@@ -40,10 +40,14 @@ const config: CapacitorConfig = {
     allowsLinkPreview: false,
     scrollEnabled: true,
     limitsNavigationsToAppBoundDomains: true,
+    // iPad support
+    preferredContentMode: 'mobile',
+    backgroundColor: '#0a0a0a',
   },
   android: {
     allowMixedContent: false,
     webContentsDebuggingEnabled: isDev,
+    backgroundColor: '#0a0a0a',
   },
   server: {
     iosScheme: 'app.fantitosjuegos.fun',
